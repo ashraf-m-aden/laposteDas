@@ -1,0 +1,114 @@
+<section class="lp-page">
+  <div class="lp-container">
+    @if (facade.created(); as shipment) {
+      <div class="lp-card success">
+        <span class="success__icon" aria-hidden="true">✅</span>
+        <h1>Envoi confirmé</h1>
+        <p>
+          Votre numéro de suivi est
+          <strong class="tracking">{{ shipment.trackingNumber }}</strong>
+        </p>
+        <p class="lp-hint">
+          Enlèvement programmé le {{ shipment.pickupDate | date: 'EEEE d MMMM y à HH:mm' }} ·
+          Montant réglé : {{ shipment.price | djf: shipment.currency }}
+        </p>
+        <div class="success__actions">
+          <a class="lp-btn" [routerLink]="['/suivi', shipment.trackingNumber]">Suivre ce colis</a>
+          <button type="button" class="lp-btn lp-btn--secondary" (click)="newShipment()">
+            Nouvel envoi
+          </button>
+        </div>
+      </div>
+    } @else {
+      <app-page-header
+        eyebrow="Envoi"
+        title="Récapitulatif"
+        subtitle="Vérifiez les informations avant confirmation. Le numéro de suivi est généré à la validation."
+      />
+      <app-shipping-stepper [current]="3" />
+
+      <div class="recap">
+        <section class="lp-card">
+          <h2>Expéditeur</h2>
+          <p class="strong">{{ facade.sender()?.fullName }}</p>
+          <p class="lp-hint">{{ facade.sender()?.phone }}</p>
+          <p>{{ facade.sender()?.address?.formatted }}</p>
+        </section>
+
+        <section class="lp-card">
+          <h2>Destinataire</h2>
+          <p class="strong">{{ facade.recipient()?.fullName }}</p>
+          <p class="lp-hint">{{ facade.recipient()?.phone }}</p>
+          <p>{{ facade.recipient()?.address?.formatted }}</p>
+        </section>
+
+        <section class="lp-card">
+          <h2>Colis</h2>
+          <dl>
+            <dt>Type</dt>
+            <dd>{{ facade.parcel().kind }}</dd>
+            <dt>Poids</dt>
+            <dd>{{ facade.parcel().weightKg }} kg</dd>
+            <dt>Dimensions</dt>
+            <dd>
+              {{ facade.parcel().lengthCm }} × {{ facade.parcel().widthCm }} ×
+              {{ facade.parcel().heightCm }} cm
+            </dd>
+          </dl>
+        </section>
+
+        <section class="lp-card">
+          <h2>Prestation</h2>
+          <p class="strong">{{ facade.selectedOffer()?.label }}</p>
+          <p class="lp-hint">{{ facade.selectedOffer()?.deliveryDelayLabel }}</p>
+          <ul class="options">
+            @for (option of facade.selectedOptions(); track option.code) {
+              <li>{{ option.label }} · {{ option.price | djf }}</li>
+            } @empty {
+              <li class="lp-hint">Aucune option</li>
+            }
+          </ul>
+        </section>
+      </div>
+
+      <div class="lp-card checkout">
+        <div>
+          <p class="lp-hint">Montant total</p>
+          <strong class="total">{{ facade.totalPrice() | djf }}</strong>
+          @if (!auth.isAuthenticated()) {
+            <p class="lp-hint">
+              Votre dossier est conservé : après connexion, vous revenez directement ici.
+            </p>
+          }
+          <p class="lp-hint legal">
+            En confirmant, vous acceptez les conditions générales de transport de La Poste de
+            Djibouti. Le prestataire de paiement en ligne reste à valider (section 10).
+          </p>
+        </div>
+        <div class="checkout__actions">
+          <button type="button" class="lp-btn lp-btn--secondary" (click)="facade.goToStep(2)">
+            Retour
+          </button>
+          @if (auth.isAuthenticated()) {
+            <button
+              type="button"
+              class="lp-btn lp-btn--accent"
+              [disabled]="!facade.canConfirm() || facade.creating()"
+              (click)="confirm()"
+            >
+              {{ facade.creating() ? 'Traitement…' : 'Confirmer et payer' }}
+            </button>
+          } @else {
+            <a
+              class="lp-btn lp-btn--accent"
+              routerLink="/compte/connexion"
+              [queryParams]="{ redirect: '/envoi/recapitulatif' }"
+            >
+              Se connecter pour confirmer
+            </a>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>

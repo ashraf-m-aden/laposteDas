@@ -1,0 +1,51 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Affranchissement"
+      title="Catalogue des produits"
+      subtitle="Timbres, enveloppes prêt-à-poster et packs d'expédition."
+    />
+
+    <div class="filters" role="group" aria-label="Filtrer par catégorie">
+      @for (category of categories; track category.code) {
+        <button
+          type="button"
+          class="lp-btn lp-btn--sm"
+          [class.lp-btn--secondary]="facade.category() !== category.code"
+          (click)="facade.setCategory(category.code)"
+        >
+          {{ category.label }}
+        </button>
+      }
+    </div>
+
+    <app-state-panel
+      [status]="facade.productsStatus()"
+      loadingLabel="Chargement du catalogue…"
+      emptyLabel="Aucun produit dans cette catégorie."
+      [errorLabel]="facade.error()?.message ?? 'Catalogue indisponible.'"
+      (retry)="facade.loadProducts()"
+    />
+
+    @if (facade.productsStatus() === 'loaded') {
+      <p class="lp-hint">{{ facade.availableCount() }} produit(s) disponible(s)</p>
+      <ul class="products">
+        @for (product of facade.products(); track product.id) {
+          <li class="product lp-card" [class.product--out]="!product.available">
+            <span class="product__icon" aria-hidden="true">{{ icons[product.icon] }}</span>
+            <h2>{{ product.name }}</h2>
+            <p class="lp-hint">{{ product.description }}</p>
+            <p class="product__price">{{ product.unitPrice | djf: product.currency }}</p>
+            @if (product.available) {
+              <button type="button" class="lp-btn lp-btn--sm" (click)="choose(product)">
+                Sélectionner
+              </button>
+            } @else {
+              <span class="lp-badge lp-badge--warning">Indisponible</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

@@ -1,0 +1,47 @@
+<div class="autocomplete" [class.autocomplete--invalid]="invalid()">
+  <label [attr.for]="fieldId()">{{ label() }}</label>
+
+  @if (resolvedLabel()) {
+    <div class="autocomplete__resolved">
+      <span class="lp-badge lp-badge--success">Adresse validée</span>
+      <p>{{ resolvedLabel() }}</p>
+      <button type="button" class="lp-btn lp-btn--ghost lp-btn--sm" (click)="clear()">
+        Modifier
+      </button>
+    </div>
+  } @else {
+    <input
+      [id]="fieldId()"
+      type="text"
+      role="combobox"
+      autocomplete="off"
+      [attr.aria-expanded]="suggestions().length > 0"
+      aria-autocomplete="list"
+      [placeholder]="placeholder()"
+      [value]="term()"
+      (input)="onInput($any($event.target).value)"
+    />
+    <p class="lp-hint">{{ hint() }}</p>
+
+    @if (searching()) {
+      <p class="lp-hint autocomplete__status">Recherche dans le référentiel…</p>
+    }
+
+    @if (suggestions().length) {
+      <ul class="autocomplete__list" role="listbox">
+        @for (suggestion of suggestions(); track suggestion.id) {
+          <li>
+            <button type="button" role="option" (click)="choose(suggestion)">
+              <span class="autocomplete__label">{{ suggestion.label }}</span>
+              <span class="lp-hint">{{ suggestion.city }} · {{ suggestion.region }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else if (noResult()) {
+      <p class="lp-error-text">
+        Adresse non reconnue par le référentiel postal. Affinez votre saisie.
+      </p>
+    }
+  }
+</div>

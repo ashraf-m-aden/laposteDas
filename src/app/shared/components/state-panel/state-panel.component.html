@@ -1,0 +1,25 @@
+@switch (status()) {
+  @case ('loading') {
+    <div class="state state--loading" role="status" aria-live="polite">
+      <span class="state__spinner" aria-hidden="true"></span>
+      <p>{{ loadingLabel() }}</p>
+    </div>
+  }
+  @case ('empty') {
+    <div class="state state--empty">
+      <span class="state__icon" aria-hidden="true">📭</span>
+      <p>{{ emptyLabel() }}</p>
+    </div>
+  }
+  @case ('error') {
+    <div class="state state--error" role="alert">
+      <span class="state__icon" aria-hidden="true">⚠️</span>
+      <p>{{ errorLabel() }}</p>
+      @if (showRetry()) {
+        <button type="button" class="lp-btn lp-btn--secondary lp-btn--sm" (click)="retry.emit()">
+          {{ retryLabel() }}
+        </button>
+      }
+    </div>
+  }
+}

@@ -1,0 +1,57 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Mon compte"
+      title="Historique"
+      [subtitle]="'Total dépensé : ' + (auth.historyTotal() | djf)"
+    />
+
+    <div class="toolbar lp-card">
+      <div class="lp-field">
+        <label for="historyType">Type</label>
+        <select id="historyType" [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)">
+          <option value="">Tout</option>
+          <option value="SHIPMENT">Envois</option>
+          <option value="POSTAGE">Affranchissements</option>
+        </select>
+      </div>
+    </div>
+
+    <app-state-panel
+      [status]="auth.historyStatus()"
+      loadingLabel="Chargement de l'historique…"
+      emptyLabel="Aucune opération enregistrée."
+      errorLabel="Historique indisponible."
+      (retry)="auth.loadHistory()"
+    />
+
+    @if (auth.historyStatus() === 'loaded') {
+      <ul class="history">
+        @for (item of items(); track item.id) {
+          <li class="entry lp-card">
+            <span class="entry__icon" aria-hidden="true">
+              {{ item.type === 'SHIPMENT' ? '📦' : '🏷️' }}
+            </span>
+            <div class="entry__body">
+              <p class="entry__label">{{ item.label }}</p>
+              <p class="lp-hint">
+                {{ item.reference }} · {{ item.date | date: 'dd/MM/yyyy HH:mm' }}
+              </p>
+            </div>
+            <div class="entry__meta">
+              <span class="lp-badge lp-badge--neutral">{{ item.status }}</span>
+              <strong>{{ item.amount | djf: item.currency }}</strong>
+              @if (isShipment(item.reference)) {
+                <a class="lp-btn lp-btn--sm lp-btn--ghost" [routerLink]="['/suivi', item.reference]">
+                  Suivre
+                </a>
+              }
+            </div>
+          </li>
+        } @empty {
+          <li class="lp-hint">Aucune opération pour ce filtre.</li>
+        }
+      </ul>
+    }
+  </div>
+</section>

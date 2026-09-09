@@ -1,0 +1,79 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <a routerLink="/agences" class="back-link">← Toutes les agences</a>
+
+    <app-state-panel
+      [status]="facade.status()"
+      loadingLabel="Chargement de la fiche agence…"
+      [errorLabel]="facade.error()?.message ?? 'Fiche indisponible.'"
+      (retry)="retry()"
+    />
+
+    @if (facade.selected(); as agency) {
+      <article class="detail">
+        <header class="detail__head lp-card">
+          <div>
+            <h1>{{ agency.name }}</h1>
+            <p class="lp-hint">{{ agency.address.formatted }}</p>
+            <p class="detail__badges">
+              <span class="lp-badge" [class.lp-badge--success]="agency.isOpenNow">
+                {{ agency.isOpenNow ? 'Ouvert actuellement' : 'Fermé actuellement' }}
+              </span>
+              @if (agency.hasAtm) {
+                <span class="lp-badge lp-badge--neutral">DAB disponible</span>
+              }
+              <span class="lp-badge lp-badge--neutral">{{ agency.distanceKm }} km</span>
+            </p>
+          </div>
+          <div class="detail__actions">
+            <button
+              type="button"
+              class="lp-btn"
+              (click)="openInDasViewer(agency.address.latitude, agency.address.longitude, agency.name)"
+            >
+              Ouvrir dans la carte D.A.S
+            </button>
+            <a class="lp-btn lp-btn--secondary" [href]="'tel:' + agency.phone">Appeler</a>
+          </div>
+        </header>
+
+        <app-das-map [points]="point()" [zoom]="16" height="320px" />
+
+        <div class="detail__grid">
+          <section class="lp-card">
+            <h2>Horaires d'ouverture</h2>
+            <ul class="hours">
+              @for (slot of agency.openingHours; track slot.day) {
+                <li class="hours__row" [class.hours__row--closed]="slot.closed">
+                  <span>{{ dayLabels[slot.day] }}</span>
+                  <span>{{ slot.closed ? 'Fermé' : slot.open + ' - ' + slot.close }}</span>
+                </li>
+              }
+            </ul>
+          </section>
+
+          <section class="lp-card">
+            <h2>Services proposés</h2>
+            <ul class="services">
+              @for (service of agency.services; track service) {
+                <li>{{ serviceLabels[service] }}</li>
+              }
+            </ul>
+
+            <h2 class="mt">Contact</h2>
+            <dl class="contact">
+              <dt>Téléphone</dt>
+              <dd>{{ agency.phone }}</dd>
+              <dt>Quartier</dt>
+              <dd>{{ agency.address.district }}</dd>
+              <dt>Ville</dt>
+              <dd>{{ agency.address.city }} ({{ agency.address.region }})</dd>
+              <dt>Coordonnées</dt>
+              <dd>{{ agency.address.latitude }}, {{ agency.address.longitude }}</dd>
+            </dl>
+          </section>
+        </div>
+      </article>
+    }
+  </div>
+</section>

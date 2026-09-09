@@ -1,0 +1,60 @@
+// Jetons de design - identité La Poste de Djibouti : jaune de marque + bleu marine.
+:root {
+  // Bleu marine institutionnel
+  --lp-navy-900: #071f4d;
+  --lp-navy-800: #0b2a63;
+  --lp-navy-700: #123c86;
+  --lp-navy-500: #1d5bbf;
+  --lp-navy-100: #e2ecfa;
+  --lp-navy-50: #f2f7fd;
+
+  // Jaune de marque (bandeau de navigation, boutons d'action)
+  --lp-yellow-500: #ffcb05;
+  --lp-yellow-400: #ffd84d;
+  --lp-yellow-600: #e0ae00;
+  --lp-yellow-100: #fff6d4;
+
+  // Alias historiques (compatibilité des composants existants)
+  --lp-blue-900: var(--lp-navy-900);
+  --lp-blue-700: var(--lp-navy-700);
+  --lp-blue-500: var(--lp-navy-500);
+  --lp-blue-100: var(--lp-navy-100);
+  --lp-blue-50: var(--lp-navy-50);
+
+  --lp-green-600: #16794a;
+  --lp-green-100: #e2f5ec;
+  --lp-red-600: #c62828;
+  --lp-red-100: #fdeaea;
+  --lp-orange-600: #b25a00;
+  --lp-orange-100: #fdf0e0;
+
+  --lp-ink: #14213d;
+  --lp-ink-soft: #46536b;
+  --lp-ink-muted: #78859c;
+  --lp-line: #dde4ee;
+  --lp-surface: #ffffff;
+  --lp-surface-alt: #f4f7fb;
+  --lp-backdrop: rgba(7, 31, 77, 0.5);
+
+  --lp-radius-sm: 6px;
+  --lp-radius: 12px;
+  --lp-radius-lg: 20px;
+  --lp-radius-pill: 999px;
+
+  --lp-space-1: 4px;
+  --lp-space-2: 8px;
+  --lp-space-3: 12px;
+  --lp-space-4: 16px;
+  --lp-space-5: 24px;
+  --lp-space-6: 32px;
+  --lp-space-7: 48px;
+  --lp-space-8: 64px;
+
+  --lp-shadow-sm: 0 1px 2px rgba(7, 31, 77, 0.08);
+  --lp-shadow: 0 6px 18px rgba(7, 31, 77, 0.1);
+  --lp-shadow-lg: 0 18px 40px rgba(7, 31, 77, 0.18);
+
+  --lp-font: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --lp-header-height: 72px;
+  --lp-container: 1220px;
+}

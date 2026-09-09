@@ -1,0 +1,123 @@
+@use 'mixins' as *;
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--lp-space-4);
+
+  &__field {
+    flex: 1 1 190px;
+    margin-bottom: 0;
+  }
+
+  &__check {
+    display: flex;
+    align-items: center;
+    gap: var(--lp-space-2);
+    min-height: 46px;
+    font-weight: 600;
+    color: var(--lp-ink-soft);
+
+    input {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__views {
+    display: flex;
+    gap: var(--lp-space-2);
+    margin-left: auto;
+  }
+
+  @include mobile {
+    &__views {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+}
+
+.results-count {
+  margin: var(--lp-space-4) 0;
+}
+
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: var(--lp-space-4);
+
+  @include tablet-down {
+    grid-template-columns: 1fr;
+  }
+}
+
+.map {
+  display: block;
+  min-height: 480px;
+}
+
+.map-panel {
+  align-self: start;
+
+  &__badges {
+    display: flex;
+    gap: var(--lp-space-2);
+  }
+}
+
+.agency-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--lp-space-4);
+}
+
+.agency-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lp-space-2);
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--lp-space-3);
+
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--lp-space-3);
+    margin-top: auto;
+    padding-top: var(--lp-space-3);
+    border-top: 1px solid var(--lp-line);
+  }
+}
+
+.services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+  list-style: none;
+  margin: var(--lp-space-2) 0;
+  padding: 0;
+
+  li {
+    padding: 2px var(--lp-space-3);
+    border-radius: var(--lp-radius-pill);
+    background: var(--lp-blue-50);
+    color: var(--lp-blue-700);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}

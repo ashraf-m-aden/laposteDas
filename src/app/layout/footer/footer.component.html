@@ -1,0 +1,43 @@
+<footer class="footer">
+  <div class="lp-container footer__top">
+    <div class="footer__brand">
+      <app-brand-logo [size]="56" alt="La Poste de Djibouti" />
+      <p class="footer__name">LA POSTE DE DJIBOUTI</p>
+      <p class="footer__text">
+        Plateforme 1 — Services Clients. Opérateur postal national de la République de Djibouti.
+        Réalisation D.A.S.
+      </p>
+    </div>
+
+    <nav class="footer__col" aria-label="Services">
+      <h2>Services</h2>
+      <a routerLink="/suivi">{{ 'nav.tracking' | t }}</a>
+      <a routerLink="/envoi">{{ 'nav.shipping' | t }}</a>
+      <a routerLink="/affranchissement">{{ 'nav.postage' | t }}</a>
+      <a routerLink="/adresses">{{ 'nav.addresses' | t }}</a>
+    </nav>
+
+    <nav class="footer__col" aria-label="Réseau">
+      <h2>Réseau</h2>
+      <a routerLink="/agences">{{ 'nav.agencies' | t }}</a>
+      <a routerLink="/compte/inscription">Compte entreprise</a>
+      <a routerLink="/entreprise">Espace entreprise</a>
+    </nav>
+
+    <nav class="footer__col" aria-label="Aide">
+      <h2>Aide</h2>
+      <a routerLink="/aide">Questions fréquentes</a>
+      <a routerLink="/aide/contact">Contacter le support</a>
+      <a routerLink="/compte/connexion">{{ 'nav.login' | t }}</a>
+    </nav>
+  </div>
+
+  <div class="lp-container footer__bottom">
+    <p>© {{ year }} La Poste de Djibouti — {{ 'footer.rights' | t }}</p>
+    @if (isMock) {
+      <p class="footer__mock">
+        Mode maquette : données factices, aucun appel réseau. Back-end cible : {{ apiUrl }}
+      </p>
+    }
+  </div>
+</footer>

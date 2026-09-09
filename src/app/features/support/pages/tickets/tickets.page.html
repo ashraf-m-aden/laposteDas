@@ -1,0 +1,117 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Aide"
+      title="Contact et demandes"
+      [subtitle]="facade.openTicketsCount() + ' demande(s) en cours de traitement'"
+    />
+
+    <div class="tickets-layout">
+      <form class="lp-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <h2>Nouvelle demande</h2>
+
+        <div class="lp-field">
+          <label for="subject">Objet</label>
+          <input id="subject" type="text" formControlName="subject" />
+          @if (form.controls.subject.touched && form.controls.subject.invalid) {
+            <p class="lp-error-text">Objet requis (4 caractères minimum).</p>
+          }
+        </div>
+
+        <div class="lp-field">
+          <label for="category">Catégorie</label>
+          <select id="category" formControlName="category">
+            @for (category of categories; track category) {
+              <option [value]="category">{{ category }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="lp-field">
+          <label for="body">Message</label>
+          <textarea id="body" formControlName="body" rows="5"></textarea>
+          @if (form.controls.body.touched && form.controls.body.invalid) {
+            <p class="lp-error-text">Décrivez votre demande (10 caractères minimum).</p>
+          }
+        </div>
+
+        <button type="submit" class="lp-btn lp-btn--block" [disabled]="facade.sending()">
+          {{ facade.sending() ? 'Envoi…' : 'Envoyer la demande' }}
+        </button>
+        <p class="lp-hint">
+          Les pièces jointes seront disponibles lors du branchement du back-end postal.
+        </p>
+      </form>
+
+      <div class="threads">
+        <app-state-panel
+          [status]="facade.ticketsStatus()"
+          loadingLabel="Chargement de vos demandes…"
+          emptyLabel="Vous n'avez aucune demande en cours."
+          [errorLabel]="facade.error()?.message ?? 'Demandes indisponibles.'"
+          (retry)="facade.loadTickets()"
+        />
+
+        @if (facade.ticketsStatus() === 'loaded') {
+          <ul class="ticket-list">
+            @for (ticket of facade.tickets(); track ticket.id) {
+              <li>
+                <button
+                  type="button"
+                  class="ticket lp-card"
+                  [class.ticket--active]="facade.selectedTicket()?.id === ticket.id"
+                  (click)="facade.selectTicket(ticket.id)"
+                >
+                  <span class="ticket__subject">{{ ticket.subject }}</span>
+                  <span class="lp-badge {{ ticket.status | statusTone }}">
+                    {{ ticket.status | statusLabel }}
+                  </span>
+                  <span class="lp-hint">
+                    {{ ticket.reference }} · {{ ticket.createdAt | date: 'dd/MM/yyyy' }}
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+
+          @if (facade.selectedTicket(); as ticket) {
+            <section class="thread lp-card">
+              <h2>{{ ticket.subject }}</h2>
+              <p class="lp-hint">{{ ticket.category }} · {{ ticket.reference }}</p>
+
+              <ol class="messages">
+                @for (message of ticket.messages; track message.id) {
+                  <li class="message" [class.message--agent]="message.author === 'AGENT'">
+                    <p class="message__author">
+                      {{ message.author === 'AGENT' ? 'Service client' : 'Vous' }}
+                    </p>
+                    <p class="message__body">{{ message.body }}</p>
+                    <p class="lp-hint">{{ message.sentAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+                  </li>
+                }
+              </ol>
+
+              <div class="lp-field">
+                <label for="reply">Répondre</label>
+                <textarea
+                  id="reply"
+                  rows="3"
+                  [value]="reply()"
+                  (input)="reply.set($any($event.target).value)"
+                ></textarea>
+              </div>
+              <button
+                type="button"
+                class="lp-btn"
+                [disabled]="facade.sending() || reply().trim().length < 2"
+                (click)="sendReply()"
+              >
+                Envoyer la réponse
+              </button>
+            </section>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</section>

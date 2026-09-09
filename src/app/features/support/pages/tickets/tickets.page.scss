@@ -1,0 +1,76 @@
+@use 'mixins' as *;
+
+.tickets-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: var(--lp-space-4);
+  align-items: start;
+
+  @include tablet-down {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ticket-list {
+  list-style: none;
+  margin: 0 0 var(--lp-space-4);
+  padding: 0;
+  display: grid;
+  gap: var(--lp-space-2);
+}
+
+.ticket {
+  display: grid;
+  gap: var(--lp-space-1);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: var(--lp-space-3) var(--lp-space-4);
+
+  &__subject {
+    font-weight: 700;
+    color: var(--lp-blue-900);
+  }
+
+  &--active {
+    border-color: var(--lp-blue-700);
+    box-shadow: 0 0 0 2px var(--lp-blue-100);
+  }
+
+  .lp-badge {
+    justify-self: start;
+  }
+}
+
+.messages {
+  list-style: none;
+  margin: var(--lp-space-4) 0;
+  padding: 0;
+  display: grid;
+  gap: var(--lp-space-3);
+}
+
+.message {
+  padding: var(--lp-space-3);
+  border-radius: var(--lp-radius);
+  background: var(--lp-surface-alt);
+
+  &--agent {
+    background: var(--lp-blue-50);
+    border-left: 3px solid var(--lp-blue-700);
+  }
+
+  &__author {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  &__body {
+    margin: var(--lp-space-1) 0;
+  }
+
+  .lp-hint {
+    margin: 0;
+  }
+}

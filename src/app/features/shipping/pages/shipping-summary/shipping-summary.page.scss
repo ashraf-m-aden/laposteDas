@@ -1,0 +1,91 @@
+@use 'mixins' as *;
+
+.recap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--lp-space-4);
+
+  h2 {
+    font-size: 1.05rem;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--lp-space-1) var(--lp-space-4);
+    margin: 0;
+
+    dt {
+      color: var(--lp-ink-muted);
+      font-size: 0.86rem;
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+}
+
+.strong {
+  font-weight: 700;
+  margin-bottom: var(--lp-space-1);
+}
+
+.options {
+  list-style: none;
+  margin: var(--lp-space-2) 0 0;
+  padding: 0;
+}
+
+.checkout {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--lp-space-5);
+  margin-top: var(--lp-space-4);
+  flex-wrap: wrap;
+
+  .lp-hint {
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--lp-space-2);
+    align-items: flex-start;
+  }
+}
+
+.total {
+  font-size: 1.8rem;
+  color: var(--lp-blue-900);
+}
+
+.legal {
+  max-width: 60ch;
+  margin-top: var(--lp-space-2) !important;
+}
+
+.success {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+
+  &__icon {
+    font-size: 2.5rem;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--lp-space-3);
+    flex-wrap: wrap;
+    margin-top: var(--lp-space-4);
+  }
+}
+
+.tracking {
+  font-family: 'Consolas', monospace;
+  font-size: 1.2rem;
+  color: var(--lp-blue-900);
+}

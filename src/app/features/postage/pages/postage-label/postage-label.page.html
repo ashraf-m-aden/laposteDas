@@ -1,0 +1,48 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Affranchissement"
+      title="Votre justificatif"
+      subtitle="Étiquette générée par le back-end postal après paiement."
+    />
+
+    @if (facade.label(); as label) {
+      <div class="label-layout">
+        <article class="stamp" aria-label="Aperçu de l'étiquette">
+          <header class="stamp__head">
+            <span class="stamp__brand">LA POSTE DE DJIBOUTI</span>
+            <span class="stamp__amount">{{ label.amount | djf: label.currency }}</span>
+          </header>
+          <p class="stamp__product">{{ label.productName }}</p>
+          <div class="stamp__code" aria-hidden="true">
+            @for (bar of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]; track bar) {
+              <span [style.height.%]="40 + (bar * 37) % 60"></span>
+            }
+          </div>
+          <p class="stamp__reference">{{ label.reference }}</p>
+          <p class="stamp__meta">Émis le {{ label.issuedAt | date: 'dd/MM/yyyy à HH:mm' }}</p>
+          <p class="stamp__qr">{{ label.qrData }}</p>
+        </article>
+
+        <aside class="lp-card actions">
+          <h2>Actions</h2>
+          <button type="button" class="lp-btn lp-btn--block" (click)="download()">
+            Télécharger le PDF
+          </button>
+          <button type="button" class="lp-btn lp-btn--secondary lp-btn--block" (click)="print()">
+            Imprimer
+          </button>
+          <button type="button" class="lp-btn lp-btn--secondary lp-btn--block" (click)="sendByEmail()">
+            Renvoyer par e-mail
+          </button>
+          <a class="lp-btn lp-btn--ghost lp-btn--block" routerLink="/affranchissement">
+            Nouvel achat
+          </a>
+          <p class="lp-hint">
+            L'étiquette reste disponible 30 jours dans votre historique.
+          </p>
+        </aside>
+      </div>
+    }
+  </div>
+</section>

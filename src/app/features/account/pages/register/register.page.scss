@@ -1,0 +1,21 @@
+@use 'mixins' as *;
+
+.register-container {
+  max-width: 780px;
+}
+
+.type-switch {
+  display: flex;
+  gap: var(--lp-space-2);
+  margin-bottom: var(--lp-space-4);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--lp-space-4);
+}
+
+.switch {
+  margin: var(--lp-space-4) 0 0;
+}

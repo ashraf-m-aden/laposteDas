@@ -1,0 +1,94 @@
+@use 'mixins' as *;
+
+.label-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: var(--lp-space-4);
+  align-items: start;
+
+  @include tablet-down {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stamp {
+  padding: var(--lp-space-5);
+  background: var(--lp-surface);
+  border: 2px dashed var(--lp-blue-700);
+  border-radius: var(--lp-radius);
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--lp-space-3);
+    padding-bottom: var(--lp-space-3);
+    border-bottom: 1px solid var(--lp-line);
+  }
+
+  &__brand {
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--lp-blue-900);
+  }
+
+  &__amount {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--lp-yellow-600);
+  }
+
+  &__product {
+    margin: var(--lp-space-4) 0 0;
+    font-weight: 600;
+  }
+
+  &__code {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 70px;
+    margin: var(--lp-space-4) 0;
+
+    span {
+      flex: 1;
+      background: var(--lp-ink);
+    }
+  }
+
+  &__reference {
+    margin: 0;
+    font-family: 'Consolas', monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  &__meta,
+  &__qr {
+    margin: var(--lp-space-1) 0 0;
+    color: var(--lp-ink-muted);
+    font-size: 0.85rem;
+  }
+
+  &__qr {
+    font-family: 'Consolas', monospace;
+    overflow-wrap: anywhere;
+  }
+}
+
+.actions {
+  display: grid;
+  gap: var(--lp-space-2);
+
+  h2 {
+    font-size: 1.05rem;
+    margin: 0;
+  }
+}
+
+@media print {
+  .actions,
+  app-page-header {
+    display: none;
+  }
+}

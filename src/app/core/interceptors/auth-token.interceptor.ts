@@ -1,0 +1,14 @@
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { TokenStorageService } from '../services/token-storage.service';
+
+/** Ajoute le jeton de session sur les appels au back-end postal. */
+export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
+  const token = inject(TokenStorageService).getToken();
+  if (!token) {
+    return next(request);
+  }
+  return next(
+    request.clone({ setHeaders: { Authorization: `Bearer ${token}` } }),
+  );
+};

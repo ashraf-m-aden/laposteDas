@@ -1,0 +1,105 @@
+<section class="lp-page">
+  <div class="lp-container register-container">
+    <app-page-header
+      eyebrow="Mon compte"
+      title="Créer un compte"
+      subtitle="Compte particulier activé immédiatement ; compte entreprise soumis à validation manuelle."
+    />
+
+    <div class="type-switch" role="group" aria-label="Type de compte">
+      <button
+        type="button"
+        class="lp-btn"
+        [class.lp-btn--secondary]="isBusiness()"
+        (click)="setType('INDIVIDUAL')"
+      >
+        Particulier
+      </button>
+      <button
+        type="button"
+        class="lp-btn"
+        [class.lp-btn--secondary]="!isBusiness()"
+        (click)="setType('BUSINESS')"
+      >
+        Entreprise
+      </button>
+    </div>
+
+    <form class="lp-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (isBusiness()) {
+        <div class="grid">
+          <div class="lp-field">
+            <label for="companyName">Raison sociale</label>
+            <input id="companyName" type="text" formControlName="companyName" />
+            @if (form.controls.companyName.touched && form.controls.companyName.invalid) {
+              <p class="lp-error-text">Raison sociale requise.</p>
+            }
+          </div>
+          <div class="lp-field">
+            <label for="legalId">Identifiant légal (NIF)</label>
+            <input id="legalId" type="text" formControlName="legalId" />
+            @if (form.controls.legalId.touched && form.controls.legalId.invalid) {
+              <p class="lp-error-text">Identifiant légal requis.</p>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="grid">
+        <div class="lp-field">
+          <label for="firstName">Prénom</label>
+          <input id="firstName" type="text" formControlName="firstName" />
+        </div>
+        <div class="lp-field">
+          <label for="lastName">Nom</label>
+          <input id="lastName" type="text" formControlName="lastName" />
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="lp-field">
+          <label for="regEmail">E-mail</label>
+          <input id="regEmail" type="email" formControlName="email" />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <p class="lp-error-text">Adresse e-mail invalide.</p>
+          }
+        </div>
+        <div class="lp-field">
+          <label for="regPhone">Téléphone</label>
+          <input id="regPhone" type="tel" formControlName="phone" placeholder="+253 77 00 00 00" />
+          @if (form.controls.phone.touched && form.controls.phone.invalid) {
+            <p class="lp-error-text">Numéro invalide.</p>
+          }
+        </div>
+      </div>
+
+      <div class="lp-field">
+        <label for="regPassword">Mot de passe</label>
+        <input id="regPassword" type="password" formControlName="password" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <p class="lp-error-text">6 caractères minimum.</p>
+        }
+      </div>
+
+      @if (isBusiness()) {
+        <p class="lp-hint">
+          Les justificatifs (registre de commerce, pièce d'identité du gérant) seront demandés à
+          l'étape de validation par les équipes de La Poste de Djibouti.
+        </p>
+      }
+
+      @if (auth.error()) {
+        <p class="lp-error-text" role="alert">{{ auth.error() }}</p>
+      }
+
+      <button type="submit" class="lp-btn" [disabled]="auth.loading()">
+        {{ auth.loading() ? 'Création…' : 'Créer mon compte' }}
+      </button>
+
+      <p class="switch">
+        Déjà inscrit ?
+        <a routerLink="/compte/connexion">Se connecter</a>
+      </p>
+    </form>
+  </div>
+</section>

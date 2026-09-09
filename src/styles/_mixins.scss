@@ -1,0 +1,62 @@
+// Points de rupture responsive (section 8 : web adaptatif mobile/tablette/desktop).
+$bp-mobile: 640px;
+$bp-tablet: 960px;
+$bp-desktop: 1280px;
+$bp-nav: 1360px;
+
+@mixin mobile {
+  @media (max-width: #{$bp-mobile}) {
+    @content;
+  }
+}
+
+@mixin tablet-down {
+  @media (max-width: #{$bp-tablet}) {
+    @content;
+  }
+}
+
+@mixin nav-collapse {
+  @media (max-width: #{$bp-nav}) {
+    @content;
+  }
+}
+
+@mixin nav-collapse-up-tight {
+  @media (max-width: 1500px) {
+    @content;
+  }
+}
+
+@mixin desktop-down {
+  @media (max-width: #{$bp-desktop}) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: #{$bp-desktop}) {
+    @content;
+  }
+}
+
+@mixin card {
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line);
+  border-radius: var(--lp-radius);
+  box-shadow: var(--lp-shadow-sm);
+}
+
+@mixin focus-ring {
+  outline: 3px solid var(--lp-blue-500);
+  outline-offset: 2px;
+}
+
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

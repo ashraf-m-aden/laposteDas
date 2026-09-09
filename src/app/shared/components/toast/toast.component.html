@@ -1,0 +1,21 @@
+<div class="toasts" aria-live="polite" aria-atomic="true">
+  @for (toast of toasts(); track toast.id) {
+    <div class="toast toast--{{ toast.type }}" role="status">
+      <span class="toast__icon" aria-hidden="true">{{ icons[toast.type] }}</span>
+      <div class="toast__body">
+        <p class="toast__title">{{ toast.title }}</p>
+        <p class="toast__message">{{ toast.message }}</p>
+      </div>
+      @if (toast.dismissible) {
+        <button
+          type="button"
+          class="toast__close"
+          [attr.aria-label]="'Fermer la notification : ' + toast.title"
+          (click)="dismiss(toast.id)"
+        >
+          ×
+        </button>
+      }
+    </div>
+  }
+</div>

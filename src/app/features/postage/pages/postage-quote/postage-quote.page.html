@@ -1,0 +1,122 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Affranchissement"
+      title="Calcul du tarif et paiement"
+      subtitle="Le tarif dépend de la destination normalisée et du poids."
+    />
+
+    @if (facade.selectedProduct(); as product) {
+      <div class="quote-grid">
+        <form class="lp-card" [formGroup]="form" (ngSubmit)="compute()" novalidate>
+          <h2>{{ product.name }}</h2>
+          <p class="lp-hint">{{ product.description }}</p>
+
+          <app-address-autocomplete
+            fieldId="postageDestination"
+            label="Destination"
+            [resolvedLabel]="destination()?.label ?? null"
+            (suggestionSelected)="onDestination($event)"
+            (cleared)="destination.set(null)"
+          />
+
+          <div class="lp-field">
+            <label for="weightGrams">Poids (grammes)</label>
+            <input id="weightGrams" type="number" min="1" formControlName="weightGrams" />
+          </div>
+
+          <div class="lp-field">
+            <label for="quantity">Quantité</label>
+            <input id="quantity" type="number" min="1" formControlName="quantity" />
+          </div>
+
+          <button type="submit" class="lp-btn" [disabled]="facade.quoteStatus() === 'loading'">
+            {{ facade.quoteStatus() === 'loading' ? 'Calcul…' : 'Calculer le tarif' }}
+          </button>
+        </form>
+
+        <div class="lp-card">
+          <h2>Récapitulatif</h2>
+
+          @if (facade.quoteStatus() === 'error') {
+            <p class="lp-error-text">{{ facade.error()?.message }}</p>
+          }
+
+          @if (facade.quote(); as quote) {
+            <dl class="quote">
+              <dt>Produit</dt>
+              <dd>{{ quote.productName }}</dd>
+              <dt>Quantité</dt>
+              <dd>{{ quote.quantity }}</dd>
+              <dt>Poids unitaire</dt>
+              <dd>{{ quote.weightGrams }} g</dd>
+              <dt>Destination</dt>
+              <dd>{{ quote.destinationLabel }}</dd>
+            </dl>
+            <p class="amount">{{ quote.amount | djf: quote.currency }}</p>
+
+            @if (auth.isAuthenticated()) {
+            <fieldset class="methods">
+              <legend>Moyen de paiement</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="method"
+                  value="CARD"
+                  [checked]="paymentMethod() === 'CARD'"
+                  (change)="paymentMethod.set('CARD')"
+                />
+                Carte bancaire
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="method"
+                  value="MOBILE_MONEY"
+                  [checked]="paymentMethod() === 'MOBILE_MONEY'"
+                  (change)="paymentMethod.set('MOBILE_MONEY')"
+                />
+                Mobile money
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="method"
+                  value="ACCOUNT"
+                  [checked]="paymentMethod() === 'ACCOUNT'"
+                  (change)="paymentMethod.set('ACCOUNT')"
+                />
+                Compte client
+              </label>
+            </fieldset>
+            }
+
+            @if (auth.isAuthenticated()) {
+              <button
+                type="button"
+                class="lp-btn lp-btn--accent lp-btn--block"
+                [disabled]="!facade.canPay()"
+                (click)="pay()"
+              >
+                {{ facade.paying() ? 'Paiement en cours…' : 'Payer' }}
+              </button>
+            } @else {
+              <a
+                class="lp-btn lp-btn--accent lp-btn--block"
+                routerLink="/compte/connexion"
+                [queryParams]="{ redirect: '/affranchissement/tarif' }"
+              >
+                Se connecter pour payer
+              </a>
+            }
+            <p class="lp-hint">
+              Prestataire de paiement à confirmer avec La Poste de Djibouti (section 10).
+            </p>
+          } @else {
+            <p class="lp-hint">Le montant s'affiche ici après le calcul du tarif.</p>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>

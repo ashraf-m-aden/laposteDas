@@ -1,0 +1,62 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Aide"
+      title="Questions fréquentes"
+      subtitle="Trouvez une réponse immédiate ou ouvrez une demande auprès du service client."
+    />
+
+    <div class="toolbar lp-card">
+      <div class="lp-field">
+        <label for="faqSearch">Rechercher</label>
+        <input
+          id="faqSearch"
+          type="search"
+          placeholder="Suivi, adresse, étiquette…"
+          [ngModel]="facade.faqQuery()"
+          (ngModelChange)="facade.setFaqQuery($event)"
+        />
+      </div>
+      <div class="lp-field">
+        <label for="faqCategory">Catégorie</label>
+        <select
+          id="faqCategory"
+          [ngModel]="facade.faqCategory()"
+          (ngModelChange)="facade.setFaqCategory($event)"
+        >
+          @for (category of facade.faqCategories(); track category) {
+            <option [value]="category">{{ category === 'ALL' ? 'Toutes' : category }}</option>
+          }
+        </select>
+      </div>
+      <a class="lp-btn lp-btn--secondary" routerLink="/aide/contact">Contacter le support</a>
+    </div>
+
+    <app-state-panel
+      [status]="facade.faqStatus()"
+      loadingLabel="Chargement de l'aide…"
+      emptyLabel="Aucun article ne correspond à votre recherche."
+      [errorLabel]="facade.error()?.message ?? 'Aide indisponible.'"
+      (retry)="facade.loadFaq()"
+    />
+
+    @if (facade.faqStatus() === 'loaded') {
+      <ul class="articles">
+        @for (article of facade.faq(); track article.id) {
+          <li class="article lp-card">
+            <button type="button" class="article__head" (click)="toggle(article.id)">
+              <span>
+                <span class="lp-badge lp-badge--neutral">{{ article.category }}</span>
+                <span class="article__question">{{ article.question }}</span>
+              </span>
+              <span aria-hidden="true">{{ openId() === article.id ? '−' : '+' }}</span>
+            </button>
+            @if (openId() === article.id) {
+              <p class="article__answer">{{ article.answer }}</p>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

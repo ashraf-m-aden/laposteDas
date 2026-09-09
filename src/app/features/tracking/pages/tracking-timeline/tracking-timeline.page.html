@@ -1,0 +1,97 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <a routerLink="/suivi" class="back-link">← Nouvelle recherche</a>
+
+    @if (facade.isNotFound()) {
+      <div class="lp-card not-found" role="alert">
+        <span aria-hidden="true" class="not-found__icon">🔍</span>
+        <h1>Colis introuvable</h1>
+        <p>
+          Aucun colis ne correspond au numéro
+          <strong>{{ facade.notFoundNumber() }}</strong>.
+        </p>
+        <p class="lp-hint">
+          Un colis devient visible sous 2 heures après son enregistrement en agence.
+        </p>
+        <div class="not-found__actions">
+          <a routerLink="/suivi" class="lp-btn">Réessayer un numéro</a>
+          <a routerLink="/aide/contact" class="lp-btn lp-btn--secondary">Contacter le support</a>
+        </div>
+      </div>
+    } @else {
+      <app-state-panel
+        [status]="facade.status()"
+        loadingLabel="Interrogation du service postal…"
+        [errorLabel]="facade.error()?.message ?? 'Erreur réseau.'"
+        (retry)="retry()"
+      />
+
+      @if (facade.parcel(); as parcel) {
+        <article class="summary lp-card">
+          <div class="summary__head">
+            <div>
+              <p class="summary__number">{{ parcel.trackingNumber }}</p>
+              <span class="lp-badge {{ parcel.status | statusTone }}">
+                {{ parcel.status | statusLabel }}
+              </span>
+            </div>
+            <div class="summary__actions">
+              <button
+                type="button"
+                class="lp-btn lp-btn--sm"
+                [class.lp-btn--secondary]="parcel.notificationsEnabled"
+                (click)="toggleNotifications()"
+              >
+                {{ parcel.notificationsEnabled ? 'Notifications activées' : 'Recevoir les notifications' }}
+              </button>
+              <button type="button" class="lp-btn lp-btn--secondary lp-btn--sm" (click)="share()">
+                Partager
+              </button>
+            </div>
+          </div>
+
+          <dl class="summary__grid">
+            <div>
+              <dt>Prestation</dt>
+              <dd>{{ parcel.serviceLabel }}</dd>
+            </div>
+            <div>
+              <dt>Poids</dt>
+              <dd>{{ parcel.weightKg }} kg</dd>
+            </div>
+            <div>
+              <dt>Origine</dt>
+              <dd>{{ parcel.origin.formatted }}</dd>
+            </div>
+            <div>
+              <dt>Destination</dt>
+              <dd>{{ parcel.destination.formatted }}</dd>
+            </div>
+            <div>
+              <dt>Livraison estimée</dt>
+              <dd>{{ parcel.estimatedDeliveryDate | date: 'EEEE d MMMM y' }}</dd>
+            </div>
+          </dl>
+        </article>
+
+        <h2 class="timeline-title">Historique d'acheminement</h2>
+        <ol class="timeline">
+          @for (event of facade.timeline(); track event.id; let first = $first) {
+            <li class="timeline__item" [class.timeline__item--current]="first">
+              <span class="timeline__dot" aria-hidden="true"></span>
+              <div class="timeline__content">
+                <p class="timeline__label">{{ event.label }}</p>
+                <p class="timeline__meta">
+                  {{ event.occurredAt | date: 'dd/MM/yyyy HH:mm' }} · {{ event.location }}
+                </p>
+                @if (event.comment) {
+                  <p class="timeline__comment">{{ event.comment }}</p>
+                }
+              </div>
+            </li>
+          }
+        </ol>
+      }
+    }
+  </div>
+</section>

@@ -1,0 +1,141 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Envoi"
+      title="Envoyer un colis"
+      subtitle="Renseignez l'expéditeur et le destinataire. Les adresses sont validées par le référentiel postal."
+    />
+    <app-shipping-stepper [current]="1" />
+
+    @if (!auth.isAuthenticated()) {
+      <p class="visitor-note lp-card">
+        Vous pouvez préparer et chiffrer votre envoi sans compte. La connexion sera demandée au
+        moment de la confirmation.
+        <a routerLink="/compte/connexion" [queryParams]="{ redirect: '/envoi' }">Se connecter</a>
+      </p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="parties">
+        <fieldset class="lp-card">
+          <legend>Expéditeur</legend>
+
+          @if (auth.isAuthenticated() && addresses.book().length) {
+            <div class="lp-field">
+              <label for="senderBook">Depuis le carnet d'adresses</label>
+              <select id="senderBook" (change)="pickFromBook('sender', $any($event.target).value)">
+                <option value="">Sélectionner…</option>
+                @for (entry of addresses.book(); track entry.id) {
+                  <option [value]="entry.id">{{ entry.contactName }} - {{ entry.address.city }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <app-address-autocomplete
+            fieldId="senderAddress"
+            label="Adresse d'enlèvement"
+            [resolvedLabel]="facade.sender()?.address?.formatted ?? null"
+            [invalid]="!!facade.sender() && !facade.senderComplete()"
+            (suggestionSelected)="onSuggestion('sender', $event)"
+            (cleared)="facade.clearAddress('sender')"
+          />
+
+          <div class="lp-field">
+            <label for="senderName">Nom complet</label>
+            <input id="senderName" type="text" formControlName="senderName" />
+          </div>
+          <div class="lp-field">
+            <label for="senderPhone">Téléphone</label>
+            <input id="senderPhone" type="tel" formControlName="senderPhone" />
+          </div>
+          <div class="lp-field">
+            <label for="senderEmail">E-mail (facultatif)</label>
+            <input id="senderEmail" type="email" formControlName="senderEmail" />
+          </div>
+        </fieldset>
+
+        <fieldset class="lp-card">
+          <legend>Destinataire</legend>
+
+          @if (auth.isAuthenticated() && addresses.book().length) {
+            <div class="lp-field">
+              <label for="recipientBook">Depuis le carnet d'adresses</label>
+              <select
+                id="recipientBook"
+                (change)="pickFromBook('recipient', $any($event.target).value)"
+              >
+                <option value="">Sélectionner…</option>
+                @for (entry of addresses.book(); track entry.id) {
+                  <option [value]="entry.id">{{ entry.contactName }} - {{ entry.address.city }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <app-address-autocomplete
+            fieldId="recipientAddress"
+            label="Adresse de livraison"
+            [resolvedLabel]="facade.recipient()?.address?.formatted ?? null"
+            [invalid]="!!facade.recipient() && !facade.recipientComplete()"
+            (suggestionSelected)="onSuggestion('recipient', $event)"
+            (cleared)="facade.clearAddress('recipient')"
+          />
+
+          <div class="lp-field">
+            <label for="recipientName">Nom complet</label>
+            <input id="recipientName" type="text" formControlName="recipientName" />
+          </div>
+          <div class="lp-field">
+            <label for="recipientPhone">Téléphone</label>
+            <input id="recipientPhone" type="tel" formControlName="recipientPhone" />
+          </div>
+
+          @if (facade.recipient()?.address && !facade.recipientComplete()) {
+            <p class="lp-error-text">
+              Adresse non utilisable pour une livraison à domicile
+              ({{ facade.recipient()?.address?.status }}).
+            </p>
+          }
+        </fieldset>
+      </div>
+
+      <fieldset class="lp-card parcel">
+        <legend>Colis</legend>
+        <div class="parcel__grid">
+          <div class="lp-field">
+            <label for="kind">Type</label>
+            <select id="kind" formControlName="kind">
+              <option value="DOCUMENT">Document</option>
+              <option value="PARCEL">Colis</option>
+              <option value="FRAGILE">Fragile</option>
+            </select>
+          </div>
+          <div class="lp-field">
+            <label for="weightKg">Poids (kg)</label>
+            <input id="weightKg" type="number" step="0.1" min="0.1" formControlName="weightKg" />
+          </div>
+          <div class="lp-field">
+            <label for="lengthCm">Longueur (cm)</label>
+            <input id="lengthCm" type="number" min="1" formControlName="lengthCm" />
+          </div>
+          <div class="lp-field">
+            <label for="widthCm">Largeur (cm)</label>
+            <input id="widthCm" type="number" min="1" formControlName="widthCm" />
+          </div>
+          <div class="lp-field">
+            <label for="heightCm">Hauteur (cm)</label>
+            <input id="heightCm" type="number" min="1" formControlName="heightCm" />
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" class="lp-btn">Choisir la prestation</button>
+        <p class="lp-hint">
+          Les adresses non reconnues bloquent la suite du parcours (règle métier 6.4).
+        </p>
+      </div>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,12 @@
+<div class="map-shell" [style.height]="height()">
+  <div class="map-shell__host" #host></div>
+
+  @if (status() === 'loading') {
+    <p class="map-shell__state" role="status">Chargement du fond de carte D.A.S…</p>
+  }
+  @if (status() === 'error') {
+    <p class="map-shell__state map-shell__state--error" role="alert">
+      Fond de carte indisponible. Les adresses restent consultables ci-dessous.
+    </p>
+  }
+</div>

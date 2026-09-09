@@ -1,0 +1,60 @@
+<section class="lp-page auth-page">
+  <div class="lp-container auth-container">
+    <div class="lp-card auth-card">
+      <h1>Se connecter</h1>
+      <p class="lp-hint">Accédez à vos envois, votre carnet d'adresses et vos notifications.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="lp-field">
+          <label for="email">E-mail</label>
+          <input id="email" type="email" formControlName="email" autocomplete="email" />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <p class="lp-error-text">Adresse e-mail invalide.</p>
+          }
+        </div>
+
+        <div class="lp-field">
+          <label for="password">Mot de passe</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <p class="lp-error-text">6 caractères minimum.</p>
+          }
+        </div>
+
+        @if (auth.error()) {
+          <p class="lp-error-text" role="alert">{{ auth.error() }}</p>
+        }
+
+        <button type="submit" class="lp-btn lp-btn--block" [disabled]="auth.loading()">
+          {{ auth.loading() ? 'Connexion…' : 'Se connecter' }}
+        </button>
+      </form>
+
+      <button type="button" class="lp-btn lp-btn--ghost lp-btn--block" (click)="forgotPassword()">
+        Mot de passe oublié ?
+      </button>
+
+      <p class="switch">
+        Pas encore de compte ?
+        <a routerLink="/compte/inscription">Créer un compte</a>
+      </p>
+
+      <div class="demo">
+        <p class="lp-hint">Comptes de démonstration (données factices) :</p>
+        <div class="demo__actions">
+          <button type="button" class="lp-btn lp-btn--sm lp-btn--secondary" (click)="fill('individual')">
+            Client particulier
+          </button>
+          <button type="button" class="lp-btn lp-btn--sm lp-btn--secondary" (click)="fill('business')">
+            Compte entreprise
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

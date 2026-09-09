@@ -1,0 +1,70 @@
+<header class="header">
+  <div class="lp-container header__inner">
+    <a class="brand" routerLink="/" (click)="ui.closeMobileMenu()">
+      <app-brand-logo [size]="48" />
+      <span class="brand__text">
+        <span class="brand__name">LA POSTE DE DJIBOUTI</span>
+        <span class="brand__tagline">{{ 'app.tagline' | t }}</span>
+      </span>
+    </a>
+
+    <button
+      type="button"
+      class="burger"
+      [attr.aria-expanded]="ui.mobileMenuOpen()"
+      aria-controls="mainNav"
+      aria-label="Menu principal"
+      (click)="ui.toggleMobileMenu()"
+    >
+      <span aria-hidden="true">{{ ui.mobileMenuOpen() ? '✕' : '☰' }}</span>
+    </button>
+
+    <nav id="mainNav" class="nav" [class.nav--open]="ui.mobileMenuOpen()">
+      <ul class="nav__list">
+        @for (link of links; track link.path) {
+          <li>
+            <a
+              [routerLink]="link.path"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: link.exact }"
+              (click)="ui.closeMobileMenu()"
+            >
+              {{ link.key | t }}
+            </a>
+          </li>
+        }
+      </ul>
+
+      <div class="nav__actions">
+        <div class="lang" role="group" aria-label="Langue">
+          <button type="button" [class.is-active]="ui.language() === 'fr'" (click)="switchLanguage('fr')">
+            FR
+          </button>
+          <button type="button" [class.is-active]="ui.language() === 'en'" (click)="switchLanguage('en')">
+            EN
+          </button>
+        </div>
+
+        @if (auth.isAuthenticated()) {
+          <a class="icon-link" routerLink="/notifications" (click)="ui.closeMobileMenu()">
+            <span aria-hidden="true">🔔</span>
+            <span class="icon-link__text">{{ 'nav.notifications' | t }}</span>
+          </a>
+          @if (auth.isBusiness()) {
+            <a class="ghost-link" routerLink="/entreprise" (click)="ui.closeMobileMenu()">
+              {{ 'nav.business' | t }}
+            </a>
+          }
+          <a class="account-pill" routerLink="/compte" (click)="ui.closeMobileMenu()">
+            {{ 'nav.account' | t }}
+          </a>
+          <button type="button" class="ghost-link" (click)="logout()">{{ 'nav.logout' | t }}</button>
+        } @else {
+          <a class="account-pill" routerLink="/compte/connexion" (click)="ui.closeMobileMenu()">
+            {{ 'nav.account' | t }}
+          </a>
+        }
+      </div>
+    </nav>
+  </div>
+</header>

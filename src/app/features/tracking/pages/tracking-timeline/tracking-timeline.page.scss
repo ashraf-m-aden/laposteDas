@@ -1,0 +1,126 @@
+@use 'mixins' as *;
+
+.back-link {
+  display: inline-block;
+  margin-bottom: var(--lp-space-4);
+  font-weight: 600;
+}
+
+.not-found {
+  max-width: 620px;
+  text-align: center;
+
+  &__icon {
+    font-size: 2.4rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--lp-space-3);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--lp-space-4);
+  }
+}
+
+.summary {
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--lp-space-4);
+    flex-wrap: wrap;
+  }
+
+  &__number {
+    margin: 0 0 var(--lp-space-2);
+    font-family: 'Consolas', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--lp-blue-900);
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--lp-space-2);
+    flex-wrap: wrap;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: var(--lp-space-4);
+    margin: var(--lp-space-5) 0 0;
+    padding-top: var(--lp-space-4);
+    border-top: 1px solid var(--lp-line);
+
+    dt {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--lp-ink-muted);
+    }
+
+    dd {
+      margin: var(--lp-space-1) 0 0;
+      font-weight: 600;
+    }
+  }
+}
+
+.timeline-title {
+  margin-top: var(--lp-space-6);
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--lp-space-5);
+  border-left: 2px solid var(--lp-blue-100);
+
+  &__item {
+    position: relative;
+    padding: 0 0 var(--lp-space-5) var(--lp-space-5);
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  &__dot {
+    position: absolute;
+    left: calc(-1 * var(--lp-space-5) - 9px);
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--lp-surface);
+    border: 3px solid var(--lp-blue-100);
+  }
+
+  &__item--current &__dot,
+  &__item--current .timeline__dot {
+    border-color: var(--lp-blue-700);
+    background: var(--lp-blue-700);
+    box-shadow: 0 0 0 4px var(--lp-blue-100);
+  }
+
+  &__label {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  &__meta {
+    margin: 2px 0 0;
+    color: var(--lp-ink-soft);
+    font-size: 0.9rem;
+  }
+
+  &__comment {
+    margin: var(--lp-space-2) 0 0;
+    padding: var(--lp-space-2) var(--lp-space-3);
+    background: var(--lp-blue-50);
+    border-radius: var(--lp-radius-sm);
+    font-size: 0.9rem;
+  }
+}

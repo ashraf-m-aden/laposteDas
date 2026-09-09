@@ -1,0 +1,73 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Mon compte"
+      title="Centre de notifications"
+      [subtitle]="facade.unreadCount() + ' notification(s) non lue(s)'"
+    />
+
+    <div class="toolbar">
+      <div class="filters" role="group" aria-label="Filtrer les notifications">
+        @for (filter of filters; track filter.code) {
+          <button
+            type="button"
+            class="lp-btn lp-btn--sm"
+            [class.lp-btn--secondary]="facade.filter() !== filter.code"
+            (click)="facade.setFilter(filter.code)"
+          >
+            {{ filter.label }}
+          </button>
+        }
+      </div>
+      <button
+        type="button"
+        class="lp-btn lp-btn--ghost lp-btn--sm"
+        [disabled]="!facade.unreadCount()"
+        (click)="facade.markAllAsRead()"
+      >
+        Tout marquer comme lu
+      </button>
+    </div>
+
+    <app-state-panel
+      [status]="facade.status()"
+      loadingLabel="Chargement des notifications…"
+      emptyLabel="Aucune notification à afficher."
+      [errorLabel]="facade.error()?.message ?? 'Notifications indisponibles.'"
+      (retry)="facade.load()"
+    />
+
+    @if (facade.status() === 'loaded') {
+      <ul class="notifications">
+        @for (notification of facade.notifications(); track notification.id) {
+          <li class="notification lp-card" [class.notification--unread]="!notification.read">
+            <span class="notification__icon" aria-hidden="true">
+              {{ typeIcons[notification.type] }}
+            </span>
+            <div class="notification__body">
+              <p class="notification__title">{{ notification.title }}</p>
+              <p class="notification__text">{{ notification.body }}</p>
+              <p class="lp-hint">{{ notification.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+            <div class="notification__actions">
+              @if (notification.link) {
+                <a class="lp-btn lp-btn--sm lp-btn--secondary" [routerLink]="notification.link">
+                  Ouvrir
+                </a>
+              }
+              @if (!notification.read) {
+                <button
+                  type="button"
+                  class="lp-btn lp-btn--ghost lp-btn--sm"
+                  (click)="facade.markAsRead(notification.id)"
+                >
+                  Marquer comme lu
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

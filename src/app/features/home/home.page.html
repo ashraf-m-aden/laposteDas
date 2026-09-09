@@ -1,0 +1,144 @@
+<section class="hero">
+  <span class="hero__sun" aria-hidden="true"></span>
+  <div class="hero__scene" aria-hidden="true">
+    <svg viewBox="0 0 1200 420" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0b2a63" />
+          <stop offset="100%" stop-color="#123c86" />
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="420" fill="url(#sky)" />
+      <g fill="#0a2455" opacity="0.85">
+        <rect x="700" y="250" width="90" height="120" />
+        <rect x="800" y="285" width="70" height="85" />
+        <rect x="890" y="230" width="26" height="140" />
+        <circle cx="903" cy="222" r="18" />
+        <rect x="930" y="270" width="120" height="100" />
+        <rect x="1060" y="300" width="90" height="70" />
+      </g>
+      <g fill="#0d3070">
+        <rect x="0" y="370" width="1200" height="50" />
+      </g>
+      <g stroke="#164a9c" stroke-width="3" fill="none" opacity="0.8">
+        <path d="M660 370c0-30 10-52 26-66" />
+        <path d="M686 304c-14-6-28-4-38 6 14 2 26 6 38-6z" fill="#164a9c" stroke="none" />
+        <path d="M686 304c14-6 28-4 38 6-14 2-26 6-38-6z" fill="#164a9c" stroke="none" />
+      </g>
+    </svg>
+  </div>
+
+  <div class="lp-container hero__inner">
+    <p class="hero__eyebrow">Plateforme Services Clients</p>
+    <h1>Connecter Djibouti,<br />livrer la confiance</h1>
+    <p class="hero__text">
+      Services postaux fiables et solutions numériques : suivi de colis, réservation
+      d'enlèvement, affranchissement en ligne et réseau d'agences — partout à Djibouti.
+    </p>
+
+    <form class="quick-track" [formGroup]="quickTrack" (ngSubmit)="track()" novalidate>
+      <label for="quickTrack" class="lp-visually-hidden">Numéro de suivi</label>
+      <input
+        id="quickTrack"
+        type="text"
+        placeholder="Entrez votre numéro de suivi (LP123456789DJ)"
+        formControlName="trackingNumber"
+      />
+      <button type="submit" class="lp-btn lp-btn--accent">Suivre un colis</button>
+    </form>
+
+    <div class="hero__actions">
+      <a class="lp-btn lp-btn--outline-light" routerLink="/envoi">Envoyer un colis</a>
+      <a class="lp-btn lp-btn--outline-light" routerLink="/agences">Trouver une agence</a>
+    </div>
+  </div>
+</section>
+
+<section class="quick-access">
+  <div class="lp-container">
+    <ul class="quick-access__grid">
+      @for (item of quickAccess; track item.link + item.title) {
+        <li>
+          <a class="access-card" [routerLink]="item.link">
+            <span class="access-card__icon" aria-hidden="true">{{ item.icon }}</span>
+            <span class="access-card__title">{{ item.title }}</span>
+            <span class="access-card__action">{{ item.action }} →</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<section class="lp-page">
+  <div class="lp-container">
+    @if (auth.isAuthenticated()) {
+      <div class="welcome lp-card">
+        <div>
+          <h2>Bonjour {{ auth.displayName() }}</h2>
+          <p class="lp-hint">Accédez directement à votre espace personnel.</p>
+        </div>
+        <div class="welcome__actions">
+          @if (auth.isBusiness()) {
+            <a class="lp-btn" routerLink="/entreprise">Tableau de bord</a>
+          }
+          <a class="lp-btn lp-btn--secondary" routerLink="/compte">Mon compte</a>
+          <a class="lp-btn lp-btn--ghost" routerLink="/notifications">Notifications</a>
+        </div>
+      </div>
+    }
+
+    <div class="section-head">
+      <h2>Services populaires</h2>
+      <a routerLink="/aide">Tous les services →</a>
+    </div>
+    <ul class="popular">
+      @for (service of popularServices; track service.label) {
+        <li>
+          <a class="popular__tile" [routerLink]="service.link">
+            <span class="popular__icon" aria-hidden="true">{{ service.icon }}</span>
+            <span>{{ service.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <div class="section-head section-head--spaced">
+      <h2>Pourquoi La Poste de Djibouti</h2>
+    </div>
+    <ul class="trust">
+      @for (point of trustPoints; track point.title) {
+        <li class="trust__item lp-card">
+          <span class="trust__icon" aria-hidden="true">{{ point.icon }}</span>
+          <h3>{{ point.title }}</h3>
+          <p class="lp-hint">{{ point.text }}</p>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<section class="business-band">
+  <div class="lp-container business-band__inner">
+    <div>
+      <h2>Vous expédiez en volume ?</h2>
+      <p>
+        Le compte entreprise donne accès aux tarifs négociés, au tableau de bord des expéditions
+        et à l'export de vos données.
+      </p>
+    </div>
+    <div class="business-band__actions">
+      <a class="lp-btn lp-btn--accent" routerLink="/compte/inscription">Ouvrir un compte entreprise</a>
+      <a class="lp-btn lp-btn--outline-light" routerLink="/compte/connexion">Se connecter</a>
+    </div>
+  </div>
+</section>
+
+<section class="badges">
+  <div class="lp-container badges__inner">
+    <span><span aria-hidden="true">🛡️</span> Opérateur national de confiance</span>
+    <span><span aria-hidden="true">🔒</span> Sûr et fiable</span>
+    <span><span aria-hidden="true">⭐</span> Moderne et centré client</span>
+    <span><span aria-hidden="true">🇩🇯</span> Fier de servir Djibouti</span>
+  </div>
+</section>

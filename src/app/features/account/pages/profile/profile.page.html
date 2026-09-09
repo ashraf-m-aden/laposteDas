@@ -1,0 +1,78 @@
+<section class="lp-page">
+  <div class="lp-container profile-container">
+    <app-page-header eyebrow="Mon compte" title="Profil et préférences" />
+
+    @if (auth.user(); as user) {
+      <div class="profile-grid">
+        <aside class="lp-card identity">
+          <p class="identity__name">{{ auth.displayName() }}</p>
+          <p class="lp-hint">{{ user.email }}</p>
+          <p class="identity__badges">
+            <span class="lp-badge">{{ user.type === 'BUSINESS' ? 'Entreprise' : 'Particulier' }}</span>
+            <span class="lp-badge {{ user.status | statusTone }}">
+              {{ user.status | statusLabel }}
+            </span>
+          </p>
+          @if (user.companyName) {
+            <dl class="identity__legal">
+              <dt>Raison sociale</dt>
+              <dd>{{ user.companyName }}</dd>
+              <dt>Identifiant légal</dt>
+              <dd>{{ user.legalId }}</dd>
+            </dl>
+          }
+          <nav class="identity__links">
+            <a routerLink="/compte/historique">Historique</a>
+            <a routerLink="/adresses/carnet">Carnet d'adresses</a>
+            <a routerLink="/notifications">Notifications</a>
+          </nav>
+        </aside>
+
+        <form class="lp-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <h2>Informations personnelles</h2>
+          <div class="grid">
+            <div class="lp-field">
+              <label for="firstName">Prénom</label>
+              <input id="firstName" type="text" formControlName="firstName" />
+            </div>
+            <div class="lp-field">
+              <label for="lastName">Nom</label>
+              <input id="lastName" type="text" formControlName="lastName" />
+            </div>
+          </div>
+
+          <div class="lp-field">
+            <label for="phone">Téléphone</label>
+            <input id="phone" type="tel" formControlName="phone" />
+          </div>
+
+          <h2>Préférences</h2>
+          <div class="lp-field">
+            <label for="language">Langue de l'interface</label>
+            <select id="language" formControlName="language">
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+
+          <label class="check">
+            <input type="checkbox" formControlName="emailNotifications" />
+            Notifications par e-mail
+          </label>
+          <label class="check">
+            <input type="checkbox" formControlName="smsNotifications" />
+            Notifications par SMS
+          </label>
+          <label class="check">
+            <input type="checkbox" formControlName="pushNotifications" />
+            Notifications push (application mobile)
+          </label>
+
+          <button type="submit" class="lp-btn" [disabled]="auth.loading()">
+            {{ auth.loading() ? 'Enregistrement…' : 'Enregistrer' }}
+          </button>
+        </form>
+      </div>
+    }
+  </div>
+</section>

@@ -1,0 +1,114 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Espace entreprise"
+      title="Tableau de bord des expéditions"
+      subtitle="Suivez vos volumes, filtrez vos envois et exportez vos données."
+    />
+
+    <div class="kpis">
+      <div class="kpi lp-card">
+        <p class="kpi__label">Total</p>
+        <strong>{{ facade.summary().total }}</strong>
+      </div>
+      <div class="kpi lp-card">
+        <p class="kpi__label">En attente</p>
+        <strong>{{ facade.summary().pending }}</strong>
+      </div>
+      <div class="kpi lp-card">
+        <p class="kpi__label">En cours</p>
+        <strong>{{ facade.summary().inProgress }}</strong>
+      </div>
+      <div class="kpi lp-card">
+        <p class="kpi__label">Livrées</p>
+        <strong>{{ facade.summary().delivered }}</strong>
+      </div>
+      <div class="kpi lp-card kpi--wide">
+        <p class="kpi__label">Montant cumulé</p>
+        <strong>{{ facade.summary().revenue | djf }}</strong>
+      </div>
+    </div>
+
+    <div class="toolbar lp-card">
+      <div class="lp-field">
+        <label for="dashSearch">Rechercher</label>
+        <input
+          id="dashSearch"
+          type="search"
+          placeholder="Numéro, destinataire, ville"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </div>
+      <div class="lp-field">
+        <label for="dashStatus">Statut</label>
+        <select id="dashStatus" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+          <option value="">Tous</option>
+          <option value="PENDING">En attente</option>
+          <option value="IN_PROGRESS">En cours</option>
+          <option value="DELIVERED">Livrées</option>
+          <option value="CANCELLED">Annulées</option>
+        </select>
+      </div>
+      <div class="toolbar__actions">
+        <button type="button" class="lp-btn lp-btn--secondary" (click)="exportCsv()">
+          Exporter (CSV)
+        </button>
+        <a class="lp-btn" routerLink="/envoi">Créer un envoi</a>
+      </div>
+    </div>
+
+    <app-state-panel
+      [status]="facade.shipmentsStatus()"
+      loadingLabel="Chargement des expéditions…"
+      emptyLabel="Aucune expédition enregistrée."
+      [errorLabel]="facade.error()?.message ?? 'Données indisponibles.'"
+      (retry)="facade.loadShipments()"
+    />
+
+    @if (facade.shipmentsStatus() === 'loaded') {
+      <div class="table-wrapper lp-card">
+        <table>
+          <caption class="lp-visually-hidden">Liste des expéditions</caption>
+          <thead>
+            <tr>
+              <th scope="col">Numéro</th>
+              <th scope="col">Destinataire</th>
+              <th scope="col">Prestation</th>
+              <th scope="col">Statut</th>
+              <th scope="col">Montant</th>
+              <th scope="col">Créée le</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (shipment of filtered(); track shipment.id) {
+              <tr>
+                <td>
+                  <a [routerLink]="['/suivi', shipment.trackingNumber]">
+                    {{ shipment.trackingNumber }}
+                  </a>
+                </td>
+                <td>
+                  {{ shipment.recipient.fullName }}
+                  <span class="lp-hint">{{ shipment.recipient.address.city }}</span>
+                </td>
+                <td>{{ shipment.serviceLabel }}</td>
+                <td>
+                  <span class="lp-badge {{ shipment.status | statusTone }}">
+                    {{ shipment.status | statusLabel }}
+                  </span>
+                </td>
+                <td>{{ shipment.price | djf: shipment.currency }}</td>
+                <td>{{ shipment.createdAt | date: 'dd/MM/yyyy' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="lp-hint">Aucune expédition ne correspond aux filtres.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

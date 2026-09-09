@@ -1,0 +1,64 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Suivi"
+      title="Suivre un colis"
+      subtitle="Saisissez le numéro figurant sur votre récépissé ou dans l'e-mail de confirmation."
+    />
+
+    <div class="lp-card search-card">
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div
+          class="lp-field"
+          [class.lp-field--invalid]="form.controls.trackingNumber.touched && form.controls.trackingNumber.invalid"
+        >
+          <label for="trackingNumber">Numéro de suivi</label>
+          <input
+            id="trackingNumber"
+            type="text"
+            formControlName="trackingNumber"
+            placeholder="LP123456789DJ"
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="trackingHelp"
+          />
+          <p id="trackingHelp" class="lp-hint">
+            13 caractères : LP, 9 chiffres puis DJ. Sur mobile, le numéro peut être scanné depuis
+            le code-barres.
+          </p>
+          @if (form.controls.trackingNumber.touched && form.controls.trackingNumber.invalid) {
+            <p class="lp-error-text">Format attendu : LP123456789DJ.</p>
+          }
+        </div>
+
+        <button type="submit" class="lp-btn lp-btn--block">Suivre</button>
+      </form>
+
+      <p class="lp-hint demo-hint">
+        Numéros de démonstration : LP123456789DJ, LP987654321DJ, LP555000111DJ.
+      </p>
+    </div>
+
+    @if (facade.recent().length) {
+      <section class="recent">
+        <div class="recent__head">
+          <h2>Derniers suivis</h2>
+          <button type="button" class="lp-btn lp-btn--ghost lp-btn--sm" (click)="clearRecent()">
+            Effacer
+          </button>
+        </div>
+        <ul class="recent__list">
+          @for (item of facade.recent(); track item.trackingNumber) {
+            <li class="recent__item">
+              <a [routerLink]="['/suivi', item.trackingNumber]">{{ item.trackingNumber }}</a>
+              <span class="lp-badge {{ item.status | statusTone }}">
+                {{ item.status | statusLabel }}
+              </span>
+              <span class="lp-hint">{{ item.searchedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+</section>

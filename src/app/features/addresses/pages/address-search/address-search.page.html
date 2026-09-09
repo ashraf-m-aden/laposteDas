@@ -1,0 +1,59 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Référentiel"
+      title="Recherche d'adresse"
+      subtitle="Vérifiez qu'une adresse est reconnue par le référentiel postal avant de l'utiliser."
+    />
+
+    <div class="search-grid">
+      <div class="lp-card">
+        <app-address-autocomplete
+          fieldId="addressSearch"
+          label="Adresse à vérifier"
+          hint="Saisissez au moins 2 caractères. Exemples : Marseille, Balbala, Tadjourah."
+          (suggestionSelected)="onSelected($event)"
+          (cleared)="facade.clearSelection()"
+        />
+      </div>
+
+      <div class="lp-card">
+        @if (facade.selected(); as address) {
+          <h2>Adresse normalisée</h2>
+          <p class="formatted">{{ address.formatted }}</p>
+          <span class="lp-badge {{ address.status | statusTone }}">
+            {{ address.status | statusLabel }}
+          </span>
+
+          <dl class="details">
+            <dt>Hiérarchie administrative</dt>
+            <dd>{{ address.hierarchy.join(' › ') }}</dd>
+            <dt>Quartier</dt>
+            <dd>{{ address.district }}</dd>
+            <dt>Ville</dt>
+            <dd>{{ address.city }}</dd>
+            <dt>Région</dt>
+            <dd>{{ address.region }}</dd>
+            <dt>Code postal</dt>
+            <dd>{{ address.postalCode || '—' }}</dd>
+            <dt>Coordonnées</dt>
+            <dd>{{ address.latitude }}, {{ address.longitude }}</dd>
+            <dt>Identifiant référentiel</dt>
+            <dd>{{ address.id }}</dd>
+          </dl>
+
+          <button type="button" class="lp-btn lp-btn--secondary lp-btn--sm" (click)="copy()">
+            Copier l'adresse normalisée
+          </button>
+        } @else {
+          <div class="placeholder">
+            <span aria-hidden="true">🗺️</span>
+            <p class="lp-hint">
+              Le détail de l'adresse s'affiche ici après sélection d'une suggestion.
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

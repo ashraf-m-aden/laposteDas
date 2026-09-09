@@ -1,0 +1,95 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Espace entreprise"
+      title="Tarifs négociés"
+      subtitle="Grille applicable à votre contrat et simulateur de tarif."
+    />
+
+    <app-state-panel
+      [status]="facade.ratesStatus()"
+      loadingLabel="Chargement de la grille tarifaire…"
+      emptyLabel="Aucune grille négociée sur ce compte."
+      [errorLabel]="facade.error()?.message ?? 'Grille indisponible.'"
+      (retry)="facade.loadRates()"
+    />
+
+    @if (facade.ratesStatus() === 'loaded') {
+      <div class="rates-layout">
+        <div class="grids">
+          @for (group of facade.ratesByService(); track group.code) {
+            <section class="lp-card">
+              <h2>{{ group.label }}</h2>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Zone</th>
+                      <th scope="col">Jusqu'à</th>
+                      <th scope="col">Tarif public</th>
+                      <th scope="col">Tarif négocié</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of group.rows; track row.zone + row.weightUpToKg) {
+                      <tr>
+                        <td>{{ row.zone }}</td>
+                        <td>{{ row.weightUpToKg }} kg</td>
+                        <td class="public">{{ row.publicPrice | djf: row.currency }}</td>
+                        <td class="negotiated">{{ row.negotiatedPrice | djf: row.currency }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+        </div>
+
+        <aside class="lp-card simulator">
+          <h2>Simulateur</h2>
+          <div class="lp-field">
+            <label for="simService">Prestation</label>
+            <select id="simService" [ngModel]="simService()" (ngModelChange)="simService.set($event)">
+              @for (group of facade.ratesByService(); track group.code) {
+                <option [value]="group.code">{{ group.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="lp-field">
+            <label for="simZone">Zone</label>
+            <select id="simZone" [ngModel]="simZone()" (ngModelChange)="simZone.set($event)">
+              @for (zone of zones(); track zone) {
+                <option [value]="zone">{{ zone }}</option>
+              }
+            </select>
+          </div>
+          <div class="lp-field">
+            <label for="simWeight">Poids (kg)</label>
+            <input
+              id="simWeight"
+              type="number"
+              min="0.1"
+              step="0.1"
+              [ngModel]="simWeight()"
+              (ngModelChange)="simWeight.set(+$event)"
+            />
+          </div>
+
+          @if (simulation(); as row) {
+            <div class="result">
+              <p class="lp-hint">Tarif applicable (tranche {{ row.weightUpToKg }} kg)</p>
+              <strong>{{ row.negotiatedPrice | djf: row.currency }}</strong>
+              <p class="lp-hint">
+                Économie de {{ row.publicPrice - row.negotiatedPrice | djf: row.currency }} par
+                rapport au tarif public.
+              </p>
+            </div>
+          } @else {
+            <p class="lp-hint">Aucun tarif pour cette combinaison.</p>
+          }
+        </aside>
+      </div>
+    }
+  </div>
+</section>

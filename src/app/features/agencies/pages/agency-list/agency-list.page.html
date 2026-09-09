@@ -1,0 +1,144 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Réseau"
+      title="Agences et points de service"
+      subtitle="Localisez une agence, un DAB ou un point de service et consultez ses horaires."
+    />
+
+    <div class="toolbar lp-card">
+      <div class="lp-field toolbar__field">
+        <label for="agencyQuery">Rechercher</label>
+        <input
+          id="agencyQuery"
+          type="search"
+          placeholder="Nom ou adresse"
+          [ngModel]="facade.filters().query"
+          (ngModelChange)="onQuery($event)"
+        />
+      </div>
+
+      <div class="lp-field toolbar__field">
+        <label for="agencyService">Service</label>
+        <select
+          id="agencyService"
+          [ngModel]="facade.filters().service ?? ''"
+          (ngModelChange)="onService($event)"
+        >
+          <option value="">Tous les services</option>
+          @for (code of serviceCodes; track code) {
+            <option [value]="code">{{ serviceLabels[code] }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="lp-field toolbar__field">
+        <label for="agencySort">Trier par</label>
+        <select id="agencySort" [ngModel]="facade.filters().sortBy" (ngModelChange)="onSort($event)">
+          <option value="distance">Distance</option>
+          <option value="name">Nom</option>
+        </select>
+      </div>
+
+      <label class="toolbar__check">
+        <input
+          type="checkbox"
+          [ngModel]="facade.filters().openOnly"
+          (ngModelChange)="onOpenOnly($event)"
+        />
+        Ouvert maintenant
+      </label>
+
+      <div class="toolbar__views" role="group" aria-label="Mode d'affichage">
+        <button
+          type="button"
+          class="lp-btn lp-btn--sm"
+          [class.lp-btn--secondary]="facade.view() !== 'list'"
+          (click)="facade.setView('list')"
+        >
+          Liste
+        </button>
+        <button
+          type="button"
+          class="lp-btn lp-btn--sm"
+          [class.lp-btn--secondary]="facade.view() !== 'map'"
+          (click)="facade.setView('map')"
+        >
+          Carte
+        </button>
+      </div>
+    </div>
+
+    <p class="lp-hint results-count">
+      {{ facade.count() }} point(s) de service · {{ facade.openCount() }} ouvert(s) actuellement
+    </p>
+
+    <app-state-panel
+      [status]="facade.status()"
+      loadingLabel="Chargement de l'annuaire des agences…"
+      emptyLabel="Aucun point de service dans cette zone avec ces filtres."
+      [errorLabel]="facade.error()?.message ?? 'Annuaire indisponible.'"
+      (retry)="facade.load()"
+    />
+
+    @if (facade.status() === 'loaded') {
+      @if (facade.view() === 'map') {
+        <div class="map-layout">
+          <app-das-map
+            class="map"
+            [points]="points()"
+            [zoom]="12"
+            height="480px"
+            (pointSelected)="select($event)"
+          />
+
+          <aside class="map-panel lp-card">
+            @if (facade.selected(); as agency) {
+              <h2>{{ agency.name }}</h2>
+              <p class="lp-hint">{{ agency.address.formatted }}</p>
+              <p class="map-panel__badges">
+                <span class="lp-badge" [class.lp-badge--success]="agency.isOpenNow">
+                  {{ agency.isOpenNow ? 'Ouvert' : 'Fermé' }}
+                </span>
+                <span class="lp-badge lp-badge--neutral">{{ agency.distanceKm }} km</span>
+              </p>
+              <ul class="services">
+                @for (service of agency.services; track service) {
+                  <li>{{ serviceLabels[service] }}</li>
+                }
+              </ul>
+              <a class="lp-btn lp-btn--sm" [routerLink]="['/agences', agency.id]">Voir le détail</a>
+            } @else {
+              <p class="lp-hint">Sélectionnez un marqueur pour afficher le détail du point.</p>
+            }
+          </aside>
+        </div>
+      } @else {
+        <ul class="agency-list">
+          @for (agency of facade.agencies(); track agency.id) {
+            <li class="agency-card lp-card">
+              <div class="agency-card__head">
+                <h2>{{ agency.name }}</h2>
+                <span class="lp-badge" [class.lp-badge--success]="agency.isOpenNow">
+                  {{ agency.isOpenNow ? 'Ouvert' : 'Fermé' }}
+                </span>
+              </div>
+              <p class="lp-hint">{{ agency.address.formatted }}</p>
+              <ul class="services">
+                @for (service of agency.services; track service) {
+                  <li>{{ serviceLabels[service] }}</li>
+                }
+              </ul>
+              <div class="agency-card__foot">
+                <span class="lp-hint">{{ agency.distanceKm }} km · {{ agency.phone }}</span>
+                <a class="lp-btn lp-btn--sm lp-btn--secondary" [routerLink]="['/agences', agency.id]">
+                  Détail
+                </a>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+</section>

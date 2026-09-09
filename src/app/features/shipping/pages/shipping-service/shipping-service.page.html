@@ -1,0 +1,85 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Envoi"
+      title="Choisir la prestation"
+      subtitle="Tarifs calculés par le back-end postal selon la destination normalisée et le colis."
+    />
+    <app-shipping-stepper [current]="2" />
+
+    <app-state-panel
+      [status]="facade.offersStatus()"
+      loadingLabel="Calcul des tarifs…"
+      emptyLabel="Aucune prestation éligible pour cette destination."
+      [errorLabel]="facade.error()?.message ?? 'Calcul indisponible.'"
+      (retry)="facade.loadOffers()"
+    />
+
+    @if (facade.offersStatus() === 'loaded') {
+      <ul class="offers">
+        @for (offer of facade.offers(); track offer.code) {
+          <li
+            class="offer lp-card"
+            [class.offer--selected]="facade.selectedOffer()?.code === offer.code"
+            [class.offer--disabled]="!offer.available"
+          >
+            <div class="offer__main">
+              <div>
+                <h2>{{ offer.label }}</h2>
+                <p class="lp-hint">{{ offer.description }}</p>
+                <p class="offer__delay">{{ offer.deliveryDelayLabel }}</p>
+                @if (!offer.available) {
+                  <p class="lp-error-text">{{ offer.unavailableReason }}</p>
+                }
+              </div>
+              <div class="offer__price">
+                <strong>{{ offer.price | djf: offer.currency }}</strong>
+                <button
+                  type="button"
+                  class="lp-btn lp-btn--sm"
+                  [class.lp-btn--secondary]="facade.selectedOffer()?.code !== offer.code"
+                  [disabled]="!offer.available"
+                  (click)="facade.selectService(offer.code)"
+                >
+                  {{ facade.selectedOffer()?.code === offer.code ? 'Sélectionné' : 'Choisir' }}
+                </button>
+              </div>
+            </div>
+
+            @if (facade.selectedOffer()?.code === offer.code && offer.options.length) {
+              <div class="offer__options">
+                <h3>Options</h3>
+                @for (option of offer.options; track option.code) {
+                  <label class="option">
+                    <input
+                      type="checkbox"
+                      [checked]="facade.selectedOptionCodes().includes(option.code)"
+                      (change)="facade.toggleOption(option.code)"
+                    />
+                    <span>{{ option.label }}</span>
+                    <span class="option__price">+ {{ option.price | djf: offer.currency }}</span>
+                  </label>
+                }
+              </div>
+            }
+          </li>
+        }
+      </ul>
+
+      <div class="footer-bar lp-card">
+        <div>
+          <p class="lp-hint">Total estimé</p>
+          <strong class="total">{{ facade.totalPrice() | djf }}</strong>
+        </div>
+        <div class="footer-bar__actions">
+          <button type="button" class="lp-btn lp-btn--secondary" (click)="facade.goToStep(1)">
+            Retour
+          </button>
+          <button type="button" class="lp-btn" [disabled]="!facade.selectedOffer()" (click)="continue()">
+            Voir le récapitulatif
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</section>

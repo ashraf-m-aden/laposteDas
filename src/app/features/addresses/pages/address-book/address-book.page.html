@@ -1,0 +1,114 @@
+<section class="lp-page">
+  <div class="lp-container">
+    <app-page-header
+      eyebrow="Mon compte"
+      title="Carnet d'adresses"
+      subtitle="Enregistrez vos adresses validées pour les réutiliser lors d'un envoi."
+    />
+
+    <div class="book-grid">
+      <form class="lp-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <h2>{{ editingId() ? 'Modifier une adresse' : 'Ajouter une adresse' }}</h2>
+
+        <app-address-autocomplete
+          fieldId="bookAddress"
+          label="Adresse"
+          [resolvedLabel]="pickedAddress()?.label ?? null"
+          (suggestionSelected)="onAddressPicked($event)"
+          (cleared)="clearAddress()"
+        />
+
+        <div class="lp-field">
+          <label for="contactName">Nom du contact</label>
+          <input id="contactName" type="text" formControlName="contactName" />
+          @if (form.controls.contactName.touched && form.controls.contactName.invalid) {
+            <p class="lp-error-text">Nom requis (2 caractères minimum).</p>
+          }
+        </div>
+
+        <div class="lp-field">
+          <label for="phone">Téléphone</label>
+          <input id="phone" type="tel" formControlName="phone" placeholder="+253 77 00 00 00" />
+          @if (form.controls.phone.touched && form.controls.phone.invalid) {
+            <p class="lp-error-text">Numéro invalide.</p>
+          }
+        </div>
+
+        <div class="lp-field">
+          <label for="kind">Type</label>
+          <select id="kind" formControlName="kind">
+            <option value="HOME">Domicile</option>
+            <option value="WORK">Bureau</option>
+            <option value="OTHER">Autre</option>
+          </select>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" formControlName="isDefault" />
+          Définir comme adresse par défaut
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="lp-btn" [disabled]="facade.saving()">
+            {{ editingId() ? 'Enregistrer' : 'Ajouter au carnet' }}
+          </button>
+          @if (editingId()) {
+            <button type="button" class="lp-btn lp-btn--ghost" (click)="cancelEdit()">Annuler</button>
+          }
+        </div>
+      </form>
+
+      <div>
+        <app-state-panel
+          [status]="facade.bookStatus()"
+          loadingLabel="Chargement du carnet…"
+          emptyLabel="Votre carnet est vide. Ajoutez une première adresse validée."
+          [errorLabel]="facade.error()?.message ?? 'Carnet indisponible.'"
+          (retry)="facade.loadBook()"
+        />
+
+        @if (facade.bookStatus() === 'loaded') {
+          <ul class="entries">
+            @for (entry of facade.book(); track entry.id) {
+              <li class="entry lp-card">
+                <div class="entry__head">
+                  <h3>{{ entry.contactName }}</h3>
+                  @if (entry.isDefault) {
+                    <span class="lp-badge lp-badge--success">Par défaut</span>
+                  }
+                </div>
+                <p class="lp-hint">{{ entry.address.formatted }}</p>
+                <p class="lp-hint">{{ entry.phone }}</p>
+                <div class="entry__actions">
+                  @if (!entry.isDefault) {
+                    <button
+                      type="button"
+                      class="lp-btn lp-btn--ghost lp-btn--sm"
+                      (click)="facade.setDefault(entry.id)"
+                    >
+                      Définir par défaut
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="lp-btn lp-btn--secondary lp-btn--sm"
+                    (click)="edit(entry)"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    type="button"
+                    class="lp-btn lp-btn--ghost lp-btn--sm danger"
+                    (click)="remove(entry)"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  </div>
+</section>

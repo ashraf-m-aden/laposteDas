@@ -1,0 +1,26 @@
+.auth-container {
+  max-width: 520px;
+}
+
+.auth-card {
+  h1 {
+    margin-bottom: var(--lp-space-1);
+  }
+}
+
+.switch {
+  margin: var(--lp-space-4) 0 0;
+  text-align: center;
+}
+
+.demo {
+  margin-top: var(--lp-space-5);
+  padding-top: var(--lp-space-4);
+  border-top: 1px dashed var(--lp-line);
+
+  &__actions {
+    display: flex;
+    gap: var(--lp-space-2);
+    flex-wrap: wrap;
+  }
+}

@@ -115,16 +115,48 @@ map: {
 
 En production, style et tuiles passent par le **back-end postal**, conformément
 au chapitre 2 du cahier des charges : la Plateforme 1 ne s'adresse jamais
-directement au service D.A.S.
+directement au service D.A.S. **Le développement fait désormais pareil**, via
+`proxy.conf.json` : les chemins sont les mêmes dans les deux environnements.
 
-Pour la démonstration locale :
+### ⚠️ La clé D.A.S — à câbler côté back-end
+
+Depuis le **2026-09-10**, D.A.S a fermé son relais de tuiles ouvert. Les tuiles
+passent par un relais authentifié, à liste blanche de cinq sources :
+
+| | |
+| --- | --- |
+| Avant | `https://carte.das.dj/tiles/{source}/{z}/{x}/{y}` — sans authentification |
+| Maintenant | `https://carte.das.dj/api/public/tiles/{source}/{z}/{x}/{y}` + en-tête `X-DAS-Key` |
+
+L'ancien chemin rend **`410 Gone`**. Ce n'est pas une panne et il ne sera pas
+rouvert.
+
+**C'est le back-end postal qui présente la clé**, et lui seul : le navigateur ne
+le peut pas — MapLibre construit lui-même ses URL de tuiles et n'accepte aucun
+en-tête. La clé reste donc dans la configuration serveur (variable
+d'environnement ou `appsettings`), **jamais** dans le code livré au client.
+
+Le relais doit aussi laisser passer `204` tel quel : une tuile vide est la
+réponse normale de la grande majorité des tuiles d'un niveau de zoom, et la
+traiter comme une erreur ferait clignoter des alertes sur une carte qui marche.
+
+> **Tant que cette clé n'est pas câblée**, les tuiles répondent `401` et la carte
+> reste vide — en dev comme en production. Une clé de **recette**, distincte de
+> celle de production, se demande à l'équipe D.A.S.
+
+Le style, lui, ne demande aucune clé : il ne contient pas de donnée, seulement la
+façon de la dessiner. Il est publié en trois langues —
+`commercial-style.json` (français, nom figé), `.en.json`, `.ar.json`.
+
+### Démonstration locale
 
 ```bash
-# 1. tunnel vers la base D.A.S, ouvert sur toutes les interfaces
-ssh -L 0.0.0.0:5433:<hote-rds>:5432 <bastion>
-# 2. tuiles + carte vitrine (projet das-admin)
-docker compose up -d martin      # Martin publié sur :3000
-npm start -- --port 4300         # das-admin, carte vitrine sur /carte
+# 1. la pile D.A.S (tuiles sous clé + carte vitrine sur /carte)
+#    ⚠️ Martin ne publie plus AUCUN port : il n'existe que sur le réseau
+#    interne de la composition Docker. Tout passe par l'API.
+docker compose up -d             # dans le dépôt das-admin
+# 2. le back-end postal, avec sa clé D.A.S configurée
+dotnet run                       # http://localhost:5000 — cible de proxy.conf.json
 # 3. cette application
 npm start                        # http://localhost:4200
 ```

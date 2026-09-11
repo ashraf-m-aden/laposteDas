@@ -64,17 +64,30 @@ export class DasMapComponent {
 
   protected readonly status = signal<'loading' | 'ready' | 'error'>('loading');
   private map: MapLibreMap | null = null;
+  /**
+   * Verrou d'initialisation. `init()` est asynchrone (import dynamique de
+   * MapLibre) : entre son appel et l'affectation de `this.map`, l'effet peut
+   * se rejouer — les points arrivent du store juste après le premier rendu.
+   * Sans ce drapeau, DEUX cartes étaient construites sur le même conteneur :
+   * le canvas de l'une, les épingles de l'autre, et l'écran restait sur
+   * « Chargement du fond de carte ».
+   */
+  private initEnCours = false;
   private markers: Marker[] = [];
   private lib: typeof import('maplibre-gl') | null = null;
 
   constructor() {
     effect(() => {
       const host = this.host().nativeElement;
-      if (!this.map) {
+      const points = this.points(); // dépendance explicite de l'effet
+      if (!this.initEnCours) {
+        this.initEnCours = true;
         void this.init(host);
         return;
       }
-      this.drawPoints();
+      if (this.map && points) {
+        this.drawPoints();
+      }
     });
     this.destroyRef.onDestroy(() => this.map?.remove());
   }
@@ -101,11 +114,13 @@ export class DasMapComponent {
     try {
       DasMapComponent.chargerCssMapLibre();
       this.lib = await import('maplibre-gl');
-      // MapLibre v6 charge son worker de rendu depuis un fichier séparé. Sous
-      // bundler, l'URL n'est pas résolue toute seule : sans ce réglage le worker
-      // reste en attente et AUCUNE géométrie n'est peinte — la carte reste bleue.
-      // Le fichier est copié à la racine par `assets` (angular.json).
-      this.lib.setWorkerUrl('/maplibre-gl-worker.mjs');
+      // MapLibre v6 charge son worker de rendu depuis un fichier séparé, copié
+      // à la racine par `assets` (angular.json). `maplibre-gl` est par ailleurs
+      // exclu de la pré-optimisation du serveur de dev : prébundlée, la
+      // librairie pointait son worker vers un chemin `deps/` que le serveur ne
+      // servait jamais — la requête restait en attente, le style ne se chargeait
+      // pas et l'écran restait sur « Chargement du fond de carte ».
+      this.lib.setWorkerUrl(new URL('maplibre-gl-worker.mjs', document.baseURI).href);
       const style = await this.loadStyle();
       const carte = new this.lib.Map({
         container: host,
@@ -131,11 +146,25 @@ export class DasMapComponent {
         }),
         'bottom-right',
       );
-      carte.once('load', () => {
-        this.status.set('ready');
-        this.drawPoints();
+      const marquerPrete = () => {
+        if (this.status() !== 'ready') {
+          this.status.set('ready');
+          this.drawPoints();
+        }
+      };
+      // `load` couvre le cas nominal ; `idle` sert de filet si une ressource du
+      // style (police distante, tuile lente) retarde l'événement `load`.
+      carte.once('load', marquerPrete);
+      carte.once('idle', marquerPrete);
+      // Une fois la carte chargée, une tuile manquante ou une police lente ne
+      // doit PAS afficher « fond de carte indisponible » par-dessus une carte
+      // qui s'affiche correctement : on ne remonte l'erreur que si le style
+      // lui-même n'a jamais abouti.
+      carte.on('error', () => {
+        if (this.status() !== 'ready') {
+          this.status.set('error');
+        }
       });
-      carte.on('error', () => this.status.set('error'));
     } catch {
       this.status.set('error');
     }

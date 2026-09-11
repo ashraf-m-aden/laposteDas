@@ -11,12 +11,26 @@ export const environment: AppEnvironment = {
   apiUrl: 'http://localhost:5000/api/v1',
   mockLatencyMs: 450,
   mockErrorRate: 0,
-  // En développement : das-admin servi par `ng serve` (port 4300) et Martin en
-  // local (port 3000). Voir README, section « Fond de carte D.A.S ».
+  // ⚠️ **Chemins RELATIFS, exactement ceux de la production.** `proxy.conf.json` les renvoie
+  // vers le back-end postal local ; en production c'est nginx qui le fait. Un seul câblage, et le
+  // mode dev répète le vrai geste — y compris « on a perdu la clé, on en redemande une ».
+  //
+  // Ce que cette configuration NE fait plus, et pourquoi :
+  //   - elle ne tape plus D.A.S en direct. Depuis le 2026-09-10 le relais direct vers Martin est
+  //     fermé : `http://<hôte>/tiles/…` rend **410 Gone**, définitivement. Les tuiles passent par
+  //     `/api/public/tiles`, sous clé révocable.
+  //   - elle ne porte pas la clé. Une clé posée ici partirait dans le bundle livré au navigateur.
+  //     C'est le back-end postal qui présente l'en-tête `X-DAS-Key` — le navigateur ne peut pas :
+  //     MapLibre construit lui-même ses URL de tuiles et n'accepte aucun en-tête.
+  //
+  // ⚠️ Tant que le back-end postal ne présente pas la clé, les tuiles répondent 401 et la carte
+  // reste vide. Voir README, « Fond de carte D.A.S ».
   map: {
-    styleUrl: 'http://localhost:4300/assets/commercial-style.json',
-    tilesUrl: 'http://localhost:3000',
-    viewerUrl: 'http://localhost:4300/carte',
+    styleUrl: '/carto/commercial-style.json',
+    tilesUrl: '/tiles',
+    // La carte vitrine D.A.S, elle, s'ouvre en direct : page publique, elle porte sa propre clé
+    // et n'en demande aucune à l'appelant.
+    viewerUrl: 'http://localhost/carte',
   },
   defaultLanguage: 'fr',
   toastDurationMs: 5000,

@@ -93,7 +93,13 @@
               "buildTarget": "laposte-services-clients:build:production"
             },
             "development": {
-              "buildTarget": "laposte-services-clients:build:development"
+              "buildTarget": "laposte-services-clients:build:development",
+              "proxyConfig": "proxy.conf.json",
+              "prebundle": {
+                "exclude": [
+                  "maplibre-gl"
+                ]
+              }
             }
           },
           "defaultConfiguration": "development"

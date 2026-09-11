@@ -161,10 +161,18 @@ façon de la dessiner. Il est publié en trois langues —
 #    interne de la composition Docker. Tout passe par l'API.
 docker compose up -d             # dans le dépôt das-admin, sert sur :80
 
-# 2. cette application, avec la clé D.A.S
-#    PowerShell :  $env:DAS_KEY = "das_XXXXXXXX.…"
-DAS_KEY="das_XXXXXXXX.…" npm start   # http://localhost:4200
+# 2. cette application — la clé D.A.S vient du .env
+cp .env.example .env             # puis y poser DAS_KEY
+npm start                        # http://localhost:4200
 ```
+
+> ⚠️ **Node ne lit pas les `.env` de lui-même.** C'est `proxy.conf.js` qui le
+> charge explicitement, au démarrage du serveur de dev. Une variable déjà posée
+> dans l'environnement l'emporte sur le fichier — pratique sur une machine de
+> build, qui n'a pas de `.env`.
+>
+> `.env` est **ignoré par git**. Une clé committée est une clé publiée, et tout
+> l'intérêt d'une clé révocable est de savoir qui la détient.
 
 Le back-end postal n'est **pas** nécessaire pour travailler sur la carte : le
 proxy le remplace. Il le redevient dès qu'on touche au reste de l'API.

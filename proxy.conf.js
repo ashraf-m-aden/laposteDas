@@ -17,19 +17,33 @@
  * donc committée.
  *
  * ── Utilisation ─────────────────────────────────────────────────────────────
+ * Copiez `.env.example` en `.env` et posez-y la clé :
  *
- *   # PowerShell
- *   $env:DAS_KEY = "das_XXXXXXXX.…"   ; npm start
+ *   DAS_KEY=das_XXXXXXXX.…
  *
- *   # bash
- *   DAS_KEY="das_XXXXXXXX.…" npm start
+ * puis `npm start`. Le fichier est ignoré par git — une clé committée est une
+ * clé publiée, et tout l'intérêt d'une clé révocable est de savoir qui la
+ * détient.
  *
- * Sans `DAS_KEY`, le style se charge mais les tuiles répondent 401 et la carte
- * reste vide. Un avertissement le dit au démarrage plutôt que de laisser
- * chercher.
+ * Une variable d'environnement déjà posée l'emporte sur le fichier, pour les
+ * machines de build qui n'ont pas de `.env`.
+ *
+ * Sans clé, le style se charge mais les tuiles répondent 401 et la carte reste
+ * vide. Un avertissement le dit au démarrage plutôt que de laisser chercher.
  *
  * ⚠️ Demandez une clé de RECETTE à D.A.S, distincte de celle de production.
  */
+const path = require('node:path');
+
+// ⚠️ Node ne lit PAS les `.env` de lui-même — c'est la surprise classique. Il
+// faut le lui demander, et `process.loadEnvFile` le fait sans dépendance
+// (Node ≥ 20.12). Il lève si le fichier n'existe pas : l'absence de `.env` est
+// un cas normal, pas une panne.
+try {
+  process.loadEnvFile(path.join(__dirname, '.env'));
+} catch {
+  /* pas de .env — les variables viennent alors de l'environnement, ou de nulle part */
+}
 
 // L'hôte de la pile D.A.S. `http://localhost` = nginx du dépôt das-admin, qui
 // sert le style et relaie l'API. `https://carte.das.dj` pour taper la recette.

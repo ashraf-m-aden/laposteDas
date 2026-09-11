@@ -43,3 +43,10 @@ Thumbs.db
 
 # Journal du serveur de dev
 serve.log
+
+# Secrets d'execution — la cle D.A.S notamment. JAMAIS suivi par git :
+# une cle committee est une cle publiee, et tout l'interet d'une cle revocable
+# est de savoir qui la detient.
+.env
+.env.local
+.env.*.local

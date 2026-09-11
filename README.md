@@ -115,8 +115,13 @@ map: {
 
 En production, style et tuiles passent par le **back-end postal**, conformément
 au chapitre 2 du cahier des charges : la Plateforme 1 ne s'adresse jamais
-directement au service D.A.S. **Le développement fait désormais pareil**, via
-`proxy.conf.json` : les chemins sont les mêmes dans les deux environnements.
+directement au service D.A.S.
+
+En développement le back-end postal ne tourne pas toujours, et `proxy.conf.js`
+joue alors son rôle : il pose le même en-tête `X-DAS-Key`, sur les mêmes
+chemins. Le front utilise donc `/carto` et `/tiles` dans les deux
+environnements — un seul câblage — et **la clé n'entre jamais dans le bundle
+livré au navigateur**.
 
 ### ⚠️ La clé D.A.S — à câbler côté back-end
 
@@ -151,15 +156,38 @@ façon de la dessiner. Il est publié en trois langues —
 ### Démonstration locale
 
 ```bash
-# 1. la pile D.A.S (tuiles sous clé + carte vitrine sur /carte)
+# 1. la pile D.A.S (style, tuiles sous clé, et carte vitrine sur /carte)
 #    ⚠️ Martin ne publie plus AUCUN port : il n'existe que sur le réseau
 #    interne de la composition Docker. Tout passe par l'API.
-docker compose up -d             # dans le dépôt das-admin
-# 2. le back-end postal, avec sa clé D.A.S configurée
-dotnet run                       # http://localhost:5000 — cible de proxy.conf.json
-# 3. cette application
-npm start                        # http://localhost:4200
+docker compose up -d             # dans le dépôt das-admin, sert sur :80
+
+# 2. cette application, avec la clé D.A.S
+#    PowerShell :  $env:DAS_KEY = "das_XXXXXXXX.…"
+DAS_KEY="das_XXXXXXXX.…" npm start   # http://localhost:4200
 ```
+
+Le back-end postal n'est **pas** nécessaire pour travailler sur la carte : le
+proxy le remplace. Il le redevient dès qu'on touche au reste de l'API.
+
+> Sans `DAS_KEY`, le style se charge mais les tuiles répondent `401` et la carte
+> reste vide. Le serveur de dev l'avertit au démarrage.
+
+Vérifié le 2026-09-11 sur la pile locale, en rejouant ce que le proxy traduit :
+
+| Requête du front | Réponse |
+| --- | --- |
+| `/carto/commercial-style.json` | `200` |
+| `/tiles/quartiers_tiles/13/…` | `200` |
+| `/tiles/blocs_tiles/13/…` | `200` |
+| `/tiles/contour_national/8/…` | `200` |
+| `/tiles/cities_labels_tiles/13/…` | `204` — tuile vide, **légitime** |
+| `/tiles/contour_national/13/…` | `404` — **hors plage de zoom** (déclarée z0–12), pas un refus |
+
+> ⚠️ Un `404` ne veut pas forcément dire « source interdite ». Chaque source a sa
+> fenêtre de zoom : `contour_national` s'arrête à z12, `adresses_tiles` commence
+> à z15. Hors de leur plage elles rendent `404`, exactement comme une source
+> inconnue. C'est normal et MapLibre s'en accommode — il ne demande une tuile que
+> dans la plage déclarée par le style.
 
 Les coordonnées des adresses factices proviennent du référentiel D.A.S (point
 intérieur du quartier réel) : des coordonnées approximatives tombent hors de la

@@ -1,4 +1,19 @@
 <a class="skip-link" href="#mainContent">Aller au contenu</a>
+
+<!--
+  Bandeau de maquette. Visible SANS DEFILER, volontairement : la ligne du pied
+  de page dit deja la meme chose, mais personne ne fait defiler une demo avant
+  de la croire. Il ne s'affiche que si `environment.useMock` est vrai — en
+  production il n'existe pas dans le rendu.
+-->
+@if (isMock) {
+  <p class="demo-band">
+    Maquette de démonstration — colis, comptes et tarifs sont des
+    <strong>données factices</strong>. La carte, elle, montre le vrai
+    référentiel D.A.S.
+  </p>
+}
+
 <app-header />
 
 <main id="mainContent" class="app-main">

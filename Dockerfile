@@ -44,10 +44,26 @@ RUN npm ci --no-audit --no-fund
 
 COPY . .
 
-# Configuration `production` : c'est `src/environments/environment.ts` qui est
-# retenu — `styleUrl: '/carto/…'` et `tilesUrl: '/tiles'`, tous deux RELATIFS,
-# donc servis par le nginx ci-dessous. Rien à réécrire dans le bundle.
-RUN npm run build -- --configuration=production
+# ⚠️ `demo` et NON `production`, et ce n'est pas un oubli.
+#
+# Le back-end postal .NET n'existe pas encore : `api.laposte.dj` ne résout pas.
+# Une image construite en `production` sert donc une application qui répond
+# « Connexion au service postal impossible » sur TOUT ce qui n'est pas la carte
+# — l'intercepteur traduit ainsi un `status === 0`, une requête sans réponse.
+#
+# `demo` garde les optimisations de production et bascule la couche API sur les
+# données factices (`src/environments/environment.demo.ts`). Ce n'est pas
+# `development` : celle-là désactive l'optimisation et embarque les sourcemaps.
+#
+# L'application DIT qu'elle est une maquette — bandeau en haut de page et ligne
+# au pied. La carte, elle, montre le vrai référentiel : elle ne passe pas par
+# l'API postale mais par le relais nginx ci-dessous.
+#
+# ▸ Le jour où le back-end postal répond : repasser à `--configuration=production`
+#   et supprimer `environment.demo.ts` ainsi que sa configuration dans
+#   `angular.json`. Les chemins de carte sont RELATIFS dans les deux, il n'y a
+#   rien d'autre à reprendre.
+RUN npm run build -- --configuration=demo
 
 # ---- Stage 2 : runtime -------------------------------------------------------
 FROM nginx:1.27-alpine AS runtime

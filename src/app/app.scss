@@ -22,3 +22,22 @@
     left: 0;
   }
 }
+
+/**
+ * Bandeau de maquette. Assez visible pour etre lu, assez sobre pour ne pas
+ * defigurer la demonstration : les couleurs sortent des tokens de la marque,
+ * pas d'un rouge d'alerte — ce n'est pas une panne, c'est un etat assume.
+ */
+.demo-band {
+  margin: 0;
+  padding: var(--lp-space-2) var(--lp-space-4);
+  background: var(--lp-yellow-500);
+  color: var(--lp-navy-900);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: center;
+
+  strong {
+    font-weight: 800;
+  }
+}

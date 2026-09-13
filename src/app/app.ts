@@ -4,6 +4,7 @@ import { HeaderComponent } from './layout/header/header.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { ToastContainerComponent } from './shared/components/toast/toast.component';
 import { UiFacade } from './store/ui/ui.facade';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,12 @@ import { UiFacade } from './store/ui/ui.facade';
 })
 export class App implements OnInit {
   private readonly ui = inject(UiFacade);
+
+  /**
+   * Vrai en maquette. Pilote le bandeau de `app.html` — l'aveu doit etre visible
+   * sans defiler, pas seulement dans le pied de page.
+   */
+  readonly isMock = environment.useMock;
 
   ngOnInit(): void {
     // Langue et session sont restaurées par l'app initializer (app.config.ts).

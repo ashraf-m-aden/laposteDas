@@ -40,7 +40,8 @@ export const environment: AppEnvironment = {
   map: {
     styleUrl: '/carto/commercial-style.json',
     tilesUrl: '/tiles',
-    viewerUrl: 'https://carte.das.dj/carte',
+    // Vide : deduit de l'origine courante — voir `environment.model.ts`.
+    viewerUrl: '',
   },
   defaultLanguage: 'fr',
   toastDurationMs: 5000,

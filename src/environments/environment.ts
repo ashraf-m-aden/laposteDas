@@ -19,6 +19,11 @@ export const environment: AppEnvironment = {
   map: {
     styleUrl: '/carto/commercial-style.json',
     tilesUrl: '/tiles',
+    // ⚠️ `das.dj` NE RESOUT PAS (verifie le 2026-09-13 : le TLD .dj repond, le
+    // domaine non). Ce lien est donc mort en l'etat. Il reste ecrit parce que
+    // c'est l'adresse PREVUE et que la production n'est pas deployee ; le jour
+    // du deploiement, soit le domaine existe, soit ce champ passe a '' pour
+    // deduire de l'origine courante — ce que font deja `demo` et `development`.
     viewerUrl: 'https://carte.das.dj/carte',
   },
   defaultLanguage: 'fr',
@@ -28,4 +33,5 @@ export const environment: AppEnvironment = {
     language: 'lpd.lang',
     recentTracking: 'lpd.recent-tracking',
   },
+  
 };

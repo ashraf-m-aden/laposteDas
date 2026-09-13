@@ -70,12 +70,35 @@ export class AgencyDetailPage implements OnInit {
    * les adresses de Djibouti, à la place d'un fond cartographique tiers.
    */
   openInDasViewer(latitude: number, longitude: number, label: string): void {
-    const url = new URL(environment.map.viewerUrl);
+    const url = new URL(this.viewerBase());
     url.searchParams.set('lat', String(latitude));
     url.searchParams.set('lng', String(longitude));
     url.searchParams.set('z', '17');
     url.searchParams.set('marker', `${longitude},${latitude}`);
     url.searchParams.set('label', label);
     window.open(url.toString(), '_blank', 'noopener');
+  }
+
+  /**
+   * Racine de la carte vitrine D.A.S.
+   *
+   * ⚠️ **Deduite de l'origine courante quand `viewerUrl` est vide**, et c'est le
+   * cas normal aujourd'hui : D.A.S et la Plateforme 1 partagent une machine,
+   * D.A.S y repond sur le port 80 et nous sur 8080 — d'ou l'hote sans le port.
+   *
+   * Une adresse ecrite en dur serait fausse partout : `localhost` ne veut rien
+   * dire pour un visiteur distant, et `carte.das.dj` NE RESOUT PAS — le domaine
+   * n'est pas encore enregistre (verifie le 2026-09-13). Un lien mort ouvert
+   * dans un nouvel onglet se decouvre par le visiteur, pas par nous.
+   *
+   * C'est le meme raisonnement que D.A.S applique a ses liens de remise de cle :
+   * l'origine publique est connue du NAVIGATEUR, jamais du serveur.
+   */
+  private viewerBase(): string {
+    const configuree = environment.map.viewerUrl;
+    if (configuree) {
+      return configuree;
+    }
+    return `${window.location.protocol}//${window.location.hostname}/carte`;
   }
 }

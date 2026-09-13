@@ -109,9 +109,17 @@ les adresses de Djibouti.
 map: {
   styleUrl: '/carto/commercial-style.json',  // style MapLibre publié par D.A.S
   tilesUrl: '/tiles',                        // tuiles, relayées par le back-end postal
-  viewerUrl: 'https://carte.das.dj/carte',   // carte vitrine D.A.S
+  viewerUrl: '',                             // vide = déduit de l'origine courante
 }
 ```
+
+> ⚠️ **`das.dj` n'existe pas encore.** Vérifié le 2026-09-13 : le TLD `.dj`
+> répond et `laposte.dj` résout, mais `das.dj` n'a aucun enregistrement DNS.
+> `viewerUrl` vide fait donc déduire le lien de l'**origine courante** —
+> `<protocole>//<hôte>/carte`, sans le port, puisque D.A.S répond sur le 80 de
+> la même machine et nous sur 8080. Ça vaut en local comme sur le serveur, sans
+> qu'aucun domaine n'ait à exister. Ne renseigner ce champ que le jour où D.A.S
+> aura une adresse à lui, ailleurs que sur notre hôte.
 
 En production, style et tuiles passent par le **back-end postal**, conformément
 au chapitre 2 du cahier des charges : la Plateforme 1 ne s'adresse jamais
@@ -130,8 +138,8 @@ passent par un relais authentifié, à liste blanche de cinq sources :
 
 | | |
 | --- | --- |
-| Avant | `https://carte.das.dj/tiles/{source}/{z}/{x}/{y}` — sans authentification |
-| Maintenant | `https://carte.das.dj/api/public/tiles/{source}/{z}/{x}/{y}` + en-tête `X-DAS-Key` |
+| Avant | `https://<hôte D.A.S>/tiles/{source}/{z}/{x}/{y}` — sans authentification |
+| Maintenant | `https://<hôte D.A.S>/api/public/tiles/{source}/{z}/{x}/{y}` + en-tête `X-DAS-Key` |
 
 L'ancien chemin rend **`410 Gone`**. Ce n'est pas une panne et il ne sera pas
 rouvert.
@@ -242,7 +250,7 @@ conteneur** : le trafic des tuiles ne sort pas de l'hôte.
 | `DAS_RESOLVER` | `127.0.0.11` | résolveur DNS interne de Docker |
 | `DAS_KEY` | *(vide)* | la clé, présentée par le relais |
 
-Quand elle déménagera, **une seule ligne change** — `DAS_ORIGIN=https://carte.das.dj`
+Quand elle déménagera, **une seule ligne change** — `DAS_ORIGIN=https://<hôte D.A.S>`
 — plus `DAS_RESOLVER`, parce que `127.0.0.11` ne sait résoudre que des noms de
 conteneurs, pas un nom public.
 

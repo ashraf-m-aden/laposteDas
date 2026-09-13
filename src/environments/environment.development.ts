@@ -30,7 +30,8 @@ export const environment: AppEnvironment = {
     tilesUrl: '/tiles',
     // La carte vitrine D.A.S, elle, s'ouvre en direct : page publique, elle porte sa propre clé
     // et n'en demande aucune à l'appelant.
-    viewerUrl: 'http://localhost/carte',
+    // Vide : deduit de l'origine courante — voir `environment.model.ts`.
+    viewerUrl: '',
   },
   defaultLanguage: 'fr',
   toastDurationMs: 5000,

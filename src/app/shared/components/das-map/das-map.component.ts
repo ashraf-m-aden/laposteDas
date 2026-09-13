@@ -14,6 +14,7 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { map as rxMap } from 'rxjs';
 import type { Map as MapLibreMap, Marker, StyleSpecification } from 'maplibre-gl';
+import { horsApiPostale } from '../../../core/interceptors/api-url.interceptor';
 import { environment } from '../../../../environments/environment';
 
 export interface MapPoint {
@@ -174,7 +175,14 @@ export class DasMapComponent {
   private loadStyle(): Promise<StyleSpecification> {
     return new Promise((resolve, reject) => {
       this.http
-        .get(environment.map.styleUrl, { responseType: 'text' })
+        // ⚠️ `horsApiPostale()` n'est pas decoratif : sans lui,
+        // `apiUrlInterceptor` prefixe cette URL relative avec
+        // `environment.apiUrl` et le style est demande au back-end postal, qui
+        // ne l'a pas. C'est nginx qui sert `/carto`, pas l'API.
+        .get(environment.map.styleUrl, {
+          responseType: 'text',
+          context: horsApiPostale(),
+        })
         .pipe(
           rxMap(
             (raw) =>

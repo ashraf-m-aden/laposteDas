@@ -251,20 +251,45 @@ conteneurs, pas un nom public.
 > Sans `DAS_KEY`, le conteneur l'annonce au démarrage (`[das] ⚠️ DAS_KEY
 > absente`), le style se charge et les tuiles rendent `401`.
 
-Vérifié le 2026-09-13, conteneur sur `das-shared`, en rejouant ce que le relais
-traduit :
+Vérifié le 2026-09-13, conteneur sur `das-shared` avec la clé `das_paQjiHPR`,
+en rejouant ce que le relais traduit :
 
 | Requête | Réponse |
 | --- | --- |
 | `/` et toute route SPA | `200` |
 | `/carto/commercial-style.json` | `200`, 24 Ko |
 | `/tiles/quartiers_tiles/13/5077/3830` | `200`, 14 Ko |
+| `/tiles/streets_tiles/13/5077/3830` | `200`, 117 Ko |
+| `/tiles/adresses_tiles/16/40620/30645` | `200`, 63 Ko |
+| `/tiles/poi_sites_tiles/13/5077/3830` | `200`, 8 Ko |
 | `/tiles/cities_labels_tiles/13/5077/3830` | `204` — tuile vide, **légitime** |
+| `/tiles/Surveys/…` — hors liste blanche | `404` |
 | `/tiles/…` sans `DAS_KEY` | `401` |
 
 > Les réponses par le relais sont **identiques** à celles obtenues en tapant
-> `das-admin` en direct avec la même clé, code par code — y compris les `404`
-> hors plage de zoom. Le relais ne réinterprète rien.
+> `das-admin` en direct avec la même clé, code par code. Le relais ne
+> réinterprète rien.
+
+### ⚠️ Le fond de carte rend `404` — ce n'est pas ce relais
+
+Les **cinq sources de fond** annoncées ouvertes le 2026-09-11 par la note
+d'intégration D.A.S rendent toutes `404` sur `/api/public/tiles`, mesuré le
+2026-09-13 :
+
+| Source | `/api/public/tiles` (clé) | `/api/tiles` (jeton admin) |
+| --- | --- | --- |
+| `contour_national` z8 | `404` | **`200`, 8 Ko** |
+| `blocs_tiles` z13 | `404` | **`200`, 323 Ko** |
+| `cities_tiles`, `route_principaux`, `voierie_secondaire` | `404` | — |
+
+La donnée existe, Martin la publie, le relais **admin** la sert. C'est la liste
+blanche du relais **public** qui est restée à cinq sources, celles du
+référentiel. Rien à corriger ici ni dans le style : tant que le back D.A.S n'a
+pas élargi cette liste, la carte n'aura **ni mer, ni routes au dézoom, ni
+texture de bâti**.
+
+> C'est exactement le symptôme que la note d'intégration attribue à un style
+> périmé. Ici le style est à jour — l'écart est côté D.A.S.
 
 ## Architecture NgRx
 

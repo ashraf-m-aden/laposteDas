@@ -1,0 +1,24 @@
+# Ce qui ne doit pas entrer dans le contexte de build.
+#
+# `node_modules` en tête : c'est le poste le plus lourd, et il serait de toute
+# façon écrasé par le `npm ci` du Dockerfile — l'envoyer au démon Docker ne
+# ferait que ralentir chaque build.
+node_modules
+dist
+.angular
+.git
+.github
+.vscode
+.idea
+
+# ⚠️ La clé D.A.S vit ici. Elle est fournie au CONTENEUR par l'environnement
+# (docker-compose), jamais copiée dans l'image : une couche d'image se relit.
+.env
+.env.local
+.env.*.local
+
+*.log
+serve.log
+coverage
+.DS_Store
+Thumbs.db

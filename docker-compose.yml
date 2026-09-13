@@ -1,0 +1,50 @@
+# =============================================================================
+# Plateforme 1 — La Poste de Djibouti.
+#
+# ⚠️ POUR L'INSTANT, cette application tourne sur le MÊME EC2 que D.A.S. C'est
+# ce qui permet à son relais de joindre la pile par son nom de conteneur, sur le
+# réseau `das-shared`, sans que le trafic des tuiles ne sorte de la machine.
+#
+# Le jour où elle déménage, un seul endroit change : `DAS_ORIGIN` (et
+# `DAS_RESOLVER`, voir plus bas). Rien dans le code, rien dans le bundle.
+# =============================================================================
+services:
+  das-laposte:
+    build: .
+    image: nejishow/das-laposte:latest
+    container_name: das-laposte
+    ports:
+      # ⚠️ Pas 80 : `das-admin` le tient déjà sur cet hôte. Tant que la
+      # Plateforme 1 n'a pas son propre nom d'hôte, elle se joint sur :8080.
+      #
+      # Surchargeable par `LAPOSTE_PORT` : 8080 est un port très disputé, et sur
+      # un poste de développement il est souvent déjà pris par autre chose. Le
+      # conflit se lit « address already in use » au `up` — poser
+      # `LAPOSTE_PORT=8099` dans `.env` évite d'éditer ce fichier pour ça.
+      - "${LAPOSTE_PORT:-8080}:80"
+    environment:
+      # Où joindre D.A.S. `das-admin` est le nginx de la pile : il sert le style
+      # statiquement (`/carto/`) et relaie l'API (`/api/`) vers le back-end.
+      # Un seul nom à connaître pour les deux.
+      DAS_ORIGIN: "${DAS_ORIGIN:-http://das-admin}"
+
+      # Résolveur DNS interne de Docker. Il ne sait résoudre que des noms de
+      # conteneurs : viser un hôte PUBLIC (https://carte.das.dj) demande de
+      # poser ici un résolveur qui sache le faire.
+      DAS_RESOLVER: "${DAS_RESOLVER:-127.0.0.11}"
+
+      # La clé D.A.S — lue depuis le `.env` du dépôt, qui n'est pas suivi par
+      # git. Absente, le style se charge mais les tuiles rendent 401 et la carte
+      # reste vide ; le conteneur le dit au démarrage plutôt que de laisser
+      # chercher.
+      DAS_KEY: "${DAS_KEY:-}"
+    restart: unless-stopped
+    networks: [das-net]
+
+networks:
+  das-net:
+    # Le même réseau que la pile D.A.S — c'est lui qui rend `das-admin`
+    # joignable par son nom. Créé par la composition de das-admin ; si elle n'a
+    # jamais tourné ici : `docker network create das-shared`.
+    external: true
+    name: das-shared

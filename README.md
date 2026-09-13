@@ -201,6 +201,71 @@ Les coordonnées des adresses factices proviennent du référentiel D.A.S (point
 intérieur du quartier réel) : des coordonnées approximatives tombent hors de la
 zone couverte et la carte s'affiche vide, sans erreur.
 
+## Déploiement en conteneur
+
+```bash
+cp .env.example .env             # puis y poser DAS_KEY
+docker compose up -d --build     # http://<hôte>:8080
+```
+
+Trois fichiers : `Dockerfile` (build Angular, puis nginx), `docker/nginx/
+default.conf.template` (la configuration) et `docker-compose.yml`.
+
+### Le nginx de l'image tient le rôle du back-end postal
+
+Tant que le back-end postal .NET ne relaie pas le fond de carte, **c'est ce
+nginx qui présente la clé** — sur les mêmes chemins que `proxy.conf.js` en
+développement :
+
+| Chemin | Vers | Clé |
+| --- | --- | --- |
+| `/carto/…` | `${DAS_ORIGIN}/carto/…` | non — le style ne contient pas de donnée |
+| `/tiles/<source>/<z>/<x>/<y>` | `${DAS_ORIGIN}/api/public/tiles/…` | **oui**, en-tête `X-DAS-Key` |
+| tout le reste | la SPA (repli `index.html`) | — |
+
+La règle du chapitre 2 tient toujours : **le navigateur ne s'adresse jamais
+directement à D.A.S**, et la clé reste dans la configuration du conteneur — elle
+n'entre ni dans le bundle, ni dans l'image.
+
+Le jour où le back-end .NET reprend ce relais, ces deux `location` disparaissent
+d'ici sans rien changer au front : les chemins sont les mêmes.
+
+### ⚠️ Même EC2 que D.A.S — pour l'instant
+
+La Plateforme 1 tourne sur la **même machine** que la pile D.A.S et rejoint son
+réseau Docker `das-shared`. Son relais joint donc D.A.S **par nom de
+conteneur** : le trafic des tuiles ne sort pas de l'hôte.
+
+| Variable | Défaut | Rôle |
+| --- | --- | --- |
+| `DAS_ORIGIN` | `http://das-admin` | où joindre la pile D.A.S |
+| `DAS_RESOLVER` | `127.0.0.11` | résolveur DNS interne de Docker |
+| `DAS_KEY` | *(vide)* | la clé, présentée par le relais |
+
+Quand elle déménagera, **une seule ligne change** — `DAS_ORIGIN=https://carte.das.dj`
+— plus `DAS_RESOLVER`, parce que `127.0.0.11` ne sait résoudre que des noms de
+conteneurs, pas un nom public.
+
+> Le port est **8080** et non 80 : `das-admin` tient déjà le 80 sur cet hôte.
+
+> Sans `DAS_KEY`, le conteneur l'annonce au démarrage (`[das] ⚠️ DAS_KEY
+> absente`), le style se charge et les tuiles rendent `401`.
+
+Vérifié le 2026-09-13, conteneur sur `das-shared`, en rejouant ce que le relais
+traduit :
+
+| Requête | Réponse |
+| --- | --- |
+| `/` et toute route SPA | `200` |
+| `/carto/commercial-style.json` | `200`, 24 Ko |
+| `/tiles/quartiers_tiles/13/5077/3830` | `200`, 14 Ko |
+| `/tiles/cities_labels_tiles/13/5077/3830` | `204` — tuile vide, **légitime** |
+| `/tiles/…` sans `DAS_KEY` | `401` |
+
+> Les réponses par le relais sont **identiques** à celles obtenues en tapant
+> `das-admin` en direct avec la même clé, code par code — y compris les `404`
+> hors plage de zoom. Le relais ne réinterprète rien.
+
 ## Architecture NgRx
 
 ```

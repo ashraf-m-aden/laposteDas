@@ -1,0 +1,17 @@
+# Normalisation des fins de ligne.
+#
+# ⚠️ Sans ce fichier, `core.autocrlf=true` (valeur par défaut de Git for Windows)
+# convertit les scripts shell en CRLF À LA SORTIE DU DÉPÔT. Le poste qui les a
+# créés ne voit rien : ses copies sont déjà en LF. C'est le CLONE SUIVANT — une
+# machine de build, un collègue, un conteneur — qui reçoit des CRLF et casse.
+#
+# Le symptôme est illisible : `sh` lit le `\r` final comme faisant partie de la
+# commande et répond `command not found` sur une ligne qui paraît juste.
+
+* text=auto
+
+# Toujours LF : ces fichiers sont lus par un shell POSIX ou par nginx.
+*.sh              text eol=lf
+Dockerfile        text eol=lf
+*.conf            text eol=lf
+*.template        text eol=lf

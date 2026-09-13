@@ -1,0 +1,93 @@
+# =============================================================================
+# Plateforme 1 — service de la SPA + relais D.A.S.
+#
+# ⚠️ Ce fichier est un MODÈLE. Le script `/docker-entrypoint.d/20-envsubst-on-
+# templates.sh` de l'image nginx le passe dans `envsubst` au démarrage et écrit
+# le résultat dans `/etc/nginx/conf.d/default.conf`. Seules les variables
+# `${DAS_*}` sont substituées (`NGINX_ENVSUBST_FILTER`, posé dans le Dockerfile) :
+# tout le reste — `$host`, `$uri`, `$is_args` — est du vocabulaire nginx et doit
+# survivre intact.
+# =============================================================================
+
+server {
+    listen 80;
+    # IPv6 aussi : le healthcheck fait `wget http://localhost/`, et dans le
+    # conteneur `localhost` résout d'abord en `::1`. Sans cette ligne le
+    # conteneur reste UNHEALTHY en permanence alors que le site répond.
+    listen [::]:80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # MapLibre est chargé en import dynamique et ses workers sont des `.mjs`.
+    # Servis avec le mauvais type MIME, le navigateur refuse le module et la
+    # carte ne s'affiche pas — sans erreur réseau visible.
+    location ~ \.mjs$ {
+        types { }
+        default_type text/javascript;
+        try_files $uri =404;
+    }
+
+    # `index.html` n'est pas empreinté par le build : sans en-tête de cache, le
+    # navigateur applique sa fraîcheur heuristique et sert une version de la
+    # veille, alors que les bundles (eux empreintés) se mettent bien à jour.
+    # `no-cache` = mettre en cache MAIS revalider ; avec l'ETag, un 304 vide.
+    location = /index.html {
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # ---- Relais D.A.S : le style ------------------------------------------
+    #
+    # Aucune clé. Le style ne contient pas de donnée, seulement la façon de la
+    # dessiner. Il est relayé plutôt que recopié : c'est ce qui garantit qu'on
+    # voit exactement ce que D.A.S voit.
+    location /carto/ {
+        resolver ${DAS_RESOLVER} valid=10s ipv6=off;
+        # Passer par une variable force nginx à RÉSOUDRE le nom à chaque appel.
+        # Écrit en dur, il le résoudrait une fois au démarrage et garderait
+        # l'IP : `das-admin` redéployé, ce relais taperait dans le vide.
+        set $das "${DAS_ORIGIN}";
+        proxy_pass $das$request_uri;
+
+        proxy_set_header Host $proxy_host;
+        proxy_ssl_server_name on;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # ---- Relais D.A.S : les tuiles, sous clé -------------------------------
+    #
+    # `/tiles/<source>/<z>/<x>/<y>` — notre chemin historique — est réécrit vers
+    # `/api/public/tiles/…`, le seul encore servi : l'ancien relais direct de
+    # D.A.S rend `410 Gone` depuis le 2026-09-10 et ne sera pas rouvert.
+    #
+    # C'est ICI que la clé est présentée, et nulle part ailleurs.
+    #
+    # Location en REGEX volontairement : elle capture la fin du chemin
+    # (`$das_tile`) pour reconstruire l'URL cible. Une regex l'emporte sur le
+    # préfixe `location /`, donc le repli SPA ne l'attrape pas.
+    location ~ ^/tiles/(?<das_tile>.+)$ {
+        resolver ${DAS_RESOLVER} valid=10s ipv6=off;
+        set $das "${DAS_ORIGIN}";
+        proxy_pass $das/api/public/tiles/$das_tile$is_args$args;
+
+        proxy_set_header Host $proxy_host;
+        proxy_ssl_server_name on;
+        proxy_set_header X-DAS-Key "${DAS_KEY}";
+
+        # ⚠️ Ne JAMAIS transformer un `204` en erreur : une tuile vide est la
+        # réponse normale de la grande majorité des tuiles d'un niveau de zoom,
+        # et un `404` signifie le plus souvent « hors de la plage de zoom de
+        # cette source », pas « source interdite ». Les deux se relaient tels
+        # quels — MapLibre s'en accommode, une page d'erreur nginx non.
+        proxy_intercept_errors off;
+
+        # La réponse est du protobuf déjà compressé : la repasser dans gzip
+        # coûte du CPU pour rien.
+        gzip off;
+    }
+
+    # ---- La SPA ------------------------------------------------------------
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
